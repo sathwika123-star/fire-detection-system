@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Reports & Documentation</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="scheduleReportBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg">
+                <i class="fas fa-calendar-alt mr-2"></i>Schedule Report
+            </button>
+            <button id="generateReportBtn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">
+                <i class="fas fa-plus mr-2"></i>Generate Report
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="index.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-video"></i>
+                            <span>Live Monitoring</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="camera-feeds.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="incident-history.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="analytics.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="emergency-contacts.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <!-- Report Templates -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 cursor-pointer" onclick="generateQuickReport('daily')">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-calendar-day text-blue-500 text-2xl mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold">Daily Incident Report</h3>
+                            <p class="text-sm text-gray-400">24-hour incident summary</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p>• Fire incidents: 3</p>
+                        <p>• False alarms: 1</p>
+                        <p>• Avg response: 42s</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 cursor-pointer" onclick="generateQuickReport('weekly')">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-calendar-week text-green-500 text-2xl mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold">Weekly Summary</h3>
+                            <p class="text-sm text-gray-400">7-day performance report</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p>• Total incidents: 18</p>
+                        <p>• System uptime: 99.8%</p>
+                        <p>• Detection rate: 98.2%</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 cursor-pointer" onclick="generateQuickReport('monthly')">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-calendar-alt text-purple-500 text-2xl mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold">Monthly Analysis</h3>
+                            <p class="text-sm text-gray-400">Comprehensive monthly report</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p>• Total incidents: 67</p>
+                        <p>• Trends analysis</p>
+                        <p>• Recommendations</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 cursor-pointer" onclick="generateQuickReport('compliance')">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-shield-alt text-yellow-500 text-2xl mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold">Compliance Report</h3>
+                            <p class="text-sm text-gray-400">Regulatory compliance audit</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p>• Safety compliance: 95%</p>
+                        <p>• System certification</p>
+                        <p>• Audit trail</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 cursor-pointer" onclick="generateQuickReport('performance')">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-chart-bar text-red-500 text-2xl mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold">Performance Metrics</h3>
+                            <p class="text-sm text-gray-400">System performance analysis</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p>• Detection accuracy: 87%</p>
+                        <p>• Response metrics</p>
+                        <p>• Camera status</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-blue-500 cursor-pointer" onclick="generateQuickReport('custom')">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-cog text-gray-500 text-2xl mr-4"></i>
+                        <div>
+                            <h3 class="font-semibold">Custom Report</h3>
+                            <p class="text-sm text-gray-400">Build your own report</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p>• Select date range</p>
+                        <p>• Choose metrics</p>
+                        <p>• Custom filters</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Reports -->
+            <div class="bg-gray-800 rounded-lg mb-8">
+                <div class="p-6 border-b border-gray-700">
+                    <h3 class="text-lg font-semibold">Recent Reports</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Report Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Generated</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Size</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                            <!-- Reports will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Scheduled Reports -->
+            <div class="bg-gray-800 rounded-lg">
+                <div class="p-6 border-b border-gray-700">
+                    <h3 class="text-lg font-semibold">Scheduled Reports</h3>
+                </div>
+                <div id="scheduledReports" class="p-6">
+                    <!-- Scheduled reports will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Report Modal -->
+    <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 p-6 rounded-lg max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-white">Generate Custom Report</h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="reportForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Report Name</label>
+                        <input type="text" id="reportName" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Report Type</label>
+                        <select id="reportType" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2" required>
+                            <option value="incident">Incident Report</option>
+                            <option value="performance">Performance Analysis</option>
+                            <option value="compliance">Compliance Audit</option>
+                            <option value="maintenance">Maintenance Log</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Start Date</label>
+                        <input type="date" id="startDate" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">End Date</label>
+                        <input type="date" id="endDate" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2" required>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm text-gray-400 mb-2">Include Sections</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" checked> Executive Summary
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" checked> Incident Details
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" checked> Performance Metrics
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2"> Camera Status
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" checked> Response Times
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2"> Recommendations
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-file-pdf mr-2"></i>Generate PDF
+                    </button>
+                    <button type="button" onclick="generateCSV()" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-file-csv mr-2"></i>Generate CSV
+                    </button>
+                    <button type="button" onclick="closeReportModal()" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        class ReportsManager {
+            constructor() {
+                this.reports = [
+                    {
+                        id: 1,
+                        name: "Daily Incident Report - Aug 24",
+                        type: "Daily",
+                        generated: "2025-08-24 23:59",
+                        size: "2.4 MB",
+                        status: "Ready",
+                        format: "PDF"
+                    },
+                    {
+                        id: 2,
+                        name: "Weekly Performance Summary",
+                        type: "Weekly",
+                        generated: "2025-08-23 18:00",
+                        size: "5.1 MB",
+                        status: "Ready",
+                        format: "PDF"
+                    },
+                    {
+                        id: 3,
+                        name: "Fire Incidents Analysis - Q3",
+                        type: "Quarterly",
+                        generated: "2025-08-20 14:30",
+                        size: "12.8 MB",
+                        status: "Ready",
+                        format: "PDF"
+                    },
+                    {
+                        id: 4,
+                        name: "System Compliance Audit",
+                        type: "Compliance",
+                        generated: "2025-08-19 10:15",
+                        size: "8.6 MB",
+                        status: "Ready",
+                        format: "PDF"
+                    },
+                    {
+                        id: 5,
+                        name: "Camera Performance Data",
+                        type: "Performance",
+                        generated: "2025-08-18 16:45",
+                        size: "1.2 MB",
+                        status: "Generating",
+                        format: "CSV"
+                    }
+                ];
+
+                this.scheduledReports = [
+                    {
+                        id: 1,
+                        name: "Daily Incident Summary",
+                        frequency: "Daily at 11:59 PM",
+                        lastRun: "2025-08-24 23:59",
+                        nextRun: "2025-08-25 23:59",
+                        active: true
+                    },
+                    {
+                        id: 2,
+                        name: "Weekly Performance Report",
+                        frequency: "Weekly on Fridays",
+                        lastRun: "2025-08-23 18:00",
+                        nextRun: "2025-08-30 18:00",
+                        active: true
+                    },
+                    {
+                        id: 3,
+                        name: "Monthly Compliance Report",
+                        frequency: "Monthly on 1st",
+                        lastRun: "2025-08-01 09:00",
+                        nextRun: "2025-09-01 09:00",
+                        active: false
+                    }
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this.renderReports();
+                this.renderScheduledReports();
+                this.bindEvents();
+                this.setDefaultDates();
+            }
+
+            bindEvents() {
+                document.getElementById('generateReportBtn').addEventListener('click', () => this.showReportModal());
+                document.getElementById('scheduleReportBtn').addEventListener('click', () => this.showScheduleModal());
+                document.getElementById('reportForm').addEventListener('submit', (e) => this.generateReport(e));
+            }
+
+            setDefaultDates() {
+                const today = new Date();
+                const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                
+                document.getElementById('startDate').value = weekAgo.toISOString().split('T')[0];
+                document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            }
+
+            renderReports() {
+                const tbody = document.getElementById('reportsTableBody');
+                tbody.innerHTML = '';
+
+                this.reports.forEach(report => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-700';
+
+                    const statusColor = report.status === 'Ready' ? 'text-green-400' : 
+                                      report.status === 'Generating' ? 'text-yellow-400' : 'text-red-400';
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 text-sm text-gray-300">${report.name}</td>
+                        <td class="px-6 py-4 text-sm text-gray-300">${report.type}</td>
+                        <td class="px-6 py-4 text-sm text-gray-300">${report.generated}</td>
+                        <td class="px-6 py-4 text-sm text-gray-300">${report.size}</td>
+                        <td class="px-6 py-4 text-sm ${statusColor}">${report.status}</td>
+                        <td class="px-6 py-4 text-sm space-x-2">
+                            ${report.status === 'Ready' ? `
+                                <button onclick="downloadReport(${report.id})" class="text-blue-400 hover:text-blue-300">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button onclick="viewReport(${report.id})" class="text-green-400 hover:text-green-300">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="shareReport(${report.id})" class="text-yellow-400 hover:text-yellow-300">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            ` : `
+                                <span class="text-gray-500">Processing...</span>
+                            `}
+                            <button onclick="deleteReport(${report.id})" class="text-red-400 hover:text-red-300">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+
+                    tbody.appendChild(row);
+                });
+            }
+
+            renderScheduledReports() {
+                const container = document.getElementById('scheduledReports');
+                container.innerHTML = '';
+
+                this.scheduledReports.forEach(report => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-700 p-4 rounded-lg border border-gray-600 mb-4';
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-semibold text-white">${report.name}</h4>
+                                <p class="text-sm text-gray-400">${report.frequency}</p>
+                                <div class="mt-2 text-sm">
+                                    <div class="text-gray-300">Last run: ${report.lastRun}</div>
+                                    <div class="text-gray-300">Next run: ${report.nextRun}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs px-2 py-1 rounded ${report.active ? 'bg-green-600' : 'bg-gray-600'}">
+                                    ${report.active ? 'Active' : 'Inactive'}
+                                </span>
+                                <button onclick="toggleSchedule(${report.id})" class="text-blue-400 hover:text-blue-300">
+                                    <i class="fas fa-${report.active ? 'pause' : 'play'}"></i>
+                                </button>
+                                <button onclick="editSchedule(${report.id})" class="text-yellow-400 hover:text-yellow-300">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteSchedule(${report.id})" class="text-red-400 hover:text-red-300">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(card);
+                });
+            }
+
+            showReportModal() {
+                document.getElementById('reportModal').classList.remove('hidden');
+                document.getElementById('reportModal').classList.add('flex');
+            }
+
+            closeReportModal() {
+                document.getElementById('reportModal').classList.add('hidden');
+                document.getElementById('reportModal').classList.remove('flex');
+            }
+
+            generateReport(e) {
+                e.preventDefault();
+                
+                const reportData = {
+                    name: document.getElementById('reportName').value,
+                    type: document.getElementById('reportType').value,
+                    startDate: document.getElementById('startDate').value,
+                    endDate: document.getElementById('endDate').value
+                };
+
+                // Simulate report generation
+                this.showNotification('Report generation started...', 'info');
+                
+                setTimeout(() => {
+                    const newReport = {
+                        id: Math.max(...this.reports.map(r => r.id)) + 1,
+                        name: reportData.name,
+                        type: reportData.type.charAt(0).toUpperCase() + reportData.type.slice(1),
+                        generated: new Date().toLocaleString(),
+                        size: (Math.random() * 10 + 1).toFixed(1) + ' MB',
+                        status: 'Ready',
+                        format: 'PDF'
+                    };
+
+                    this.reports.unshift(newReport);
+                    this.renderReports();
+                    this.showNotification('Report generated successfully!', 'success');
+                }, 3000);
+
+                this.closeReportModal();
+            }
+
+            downloadReport(id) {
+                const report = this.reports.find(r => r.id === id);
+                if (report) {
+                    this.showNotification(`Downloading ${report.name}...`, 'info');
+                    // In a real implementation, this would trigger an actual download
+                }
+            }
+
+            viewReport(id) {
+                const report = this.reports.find(r => r.id === id);
+                if (report) {
+                    this.showNotification(`Opening ${report.name} in viewer...`, 'info');
+                    // In a real implementation, this would open the report in a viewer
+                }
+            }
+
+            shareReport(id) {
+                const report = this.reports.find(r => r.id === id);
+                if (report) {
+                    this.showNotification(`Sharing ${report.name}...`, 'info');
+                    // In a real implementation, this would open sharing options
+                }
+            }
+
+            deleteReport(id) {
+                if (confirm('Are you sure you want to delete this report?')) {
+                    this.reports = this.reports.filter(r => r.id !== id);
+                    this.renderReports();
+                    this.showNotification('Report deleted successfully', 'warning');
+                }
+            }
+
+            showNotification(message, type) {
+                const notification = document.createElement('div');
+                const colors = {
+                    success: 'bg-green-600',
+                    warning: 'bg-yellow-600',
+                    error: 'bg-red-600',
+                    info: 'bg-blue-600'
+                };
+                
+                notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // Global functions
+        function generateQuickReport(type) {
+            window.reportsManager.showNotification(`Generating ${type} report...`, 'info');
+            setTimeout(() => {
+                window.reportsManager.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} report ready for download`, 'success');
+            }, 2000);
+        }
+
+        function downloadReport(id) {
+            window.reportsManager.downloadReport(id);
+        }
+
+        function viewReport(id) {
+            window.reportsManager.viewReport(id);
+        }
+
+        function shareReport(id) {
+            window.reportsManager.shareReport(id);
+        }
+
+        function deleteReport(id) {
+            window.reportsManager.deleteReport(id);
+        }
+
+        function toggleSchedule(id) {
+            const schedule = window.reportsManager.scheduledReports.find(s => s.id === id);
+            if (schedule) {
+                schedule.active = !schedule.active;
+                window.reportsManager.renderScheduledReports();
+                window.reportsManager.showNotification(
+                    `Schedule ${schedule.active ? 'activated' : 'deactivated'}`, 
+                    schedule.active ? 'success' : 'warning'
+                );
+            }
+        }
+
+        function editSchedule(id) {
+            window.reportsManager.showNotification('Schedule editor opening...', 'info');
+        }
+
+        function deleteSchedule(id) {
+            if (confirm('Are you sure you want to delete this scheduled report?')) {
+                window.reportsManager.scheduledReports = window.reportsManager.scheduledReports.filter(s => s.id !== id);
+                window.reportsManager.renderScheduledReports();
+                window.reportsManager.showNotification('Scheduled report deleted', 'warning');
+            }
+        }
+
+        function generateCSV() {
+            window.reportsManager.showNotification('Generating CSV report...', 'info');
+            window.reportsManager.closeReportModal();
+        }
+
+        function closeReportModal() {
+            window.reportsManager.closeReportModal();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            window.reportsManager = new ReportsManager();
+        });
+    </script>
+</body>
+</html>

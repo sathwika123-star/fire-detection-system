@@ -1,0 +1,240 @@
+# Fire Detection App - Models
+from django.db import models
+from django.contrib.auth.models import User
+import uuid
+
+class Camera(models.Model):
+    CAMERA_STATUS_CHOICES = [
+        ('online', 'Online'),
+        ('offline', 'Offline'),
+        ('maintenance', 'Maintenance'),
+    ]
+    
+    RESOLUTION_CHOICES = [
+        ('720p', '720p'),
+        ('1080p', '1080p'),
+        ('4K', '4K'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    location = models.CharField(max_length=200)
+    rtsp_url = models.URLField()
+    status = models.CharField(max_length=20, choices=CAMERA_STATUS_CHOICES, default='offline')
+    resolution = models.CharField(max_length=10, choices=RESOLUTION_CHOICES, default='1080p')
+    is_recording = models.BooleanField(default=False)
+    last_frame_time = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['location', 'name']
+    
+    def __str__(self):
+        return f"{self.name} - {self.location}"
+
+class FireDetectionEvent(models.Model):
+    SEVERITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('resolved', 'Resolved'),
+        ('false_alarm', 'False Alarm'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, related_name='detection_events')
+    confidence_score = models.FloatField()
+    people_count = models.IntegerField(default=0)
+    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    bounding_boxes = models.TextField(default='[]')  # Store JSON as text for SQLite compatibility
+    snapshot_path = models.CharField(max_length=500, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)  # Additional notes about the incident
+    detected_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    response_time = models.DurationField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-detected_at']
+    
+    def __str__(self):
+        return f"Fire Event - {self.camera.location} - {self.confidence_score:.2f}"
+
+class EmergencyContact(models.Model):
+    CONTACT_CATEGORIES = [
+        ('primary', 'Primary Emergency'),
+        ('secondary', 'Secondary'),
+        ('internal', 'Internal Staff'),
+        ('external', 'External Services'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('high', 'High'),
+        ('medium', 'Medium'),
+        ('low', 'Low'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField(null=True, blank=True)
+    category = models.CharField(max_length=20, choices=CONTACT_CATEGORIES)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['category', '-priority', 'name']
+    
+    def __str__(self):
+        return f"{self.name} - {self.title}"
+
+class SystemConfiguration(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    detection_threshold = models.FloatField(default=0.5)
+    auto_alert_threshold = models.FloatField(default=0.8)
+    alert_cooldown_minutes = models.IntegerField(default=5)
+    auto_emergency_call = models.BooleanField(default=True)
+    emergency_call_delay_seconds = models.IntegerField(default=30)
+    detection_confidence_threshold = models.FloatField(default=0.7)
+    sms_notifications = models.BooleanField(default=True)
+    email_notifications = models.BooleanField(default=True)
+    siren_activation = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "System Configuration"
+        verbose_name_plural = "System Configuration"
+    
+    def __str__(self):
+        return "System Configuration"
+    
+    @classmethod
+    def get_config(cls):
+        config, created = cls.objects.get_or_create(pk=1)
+        return config
+
+class VideoAnalysis(models.Model):
+    ANALYSIS_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
+    
+    SOURCE_TYPE_CHOICES = [
+        ('url', 'URL'),
+        ('upload', 'Upload'),
+        ('camera', 'Camera'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    source_type = models.CharField(max_length=10, choices=SOURCE_TYPE_CHOICES)
+    video_url = models.URLField(null=True, blank=True)
+    video_file = models.FileField(upload_to='uploaded_videos/', null=True, blank=True)
+    location = models.CharField(max_length=200, default='External Source')
+    
+    # Analysis results
+    fire_detected = models.BooleanField(default=False)
+    confidence_score = models.FloatField(default=0.0)
+    detection_timestamp = models.CharField(max_length=50, null=True, blank=True)
+    analysis_status = models.CharField(max_length=20, choices=ANALYSIS_STATUS_CHOICES, default='pending')
+    
+    # Emergency response
+    alerts_sent = models.BooleanField(default=False)
+    sms_sent = models.BooleanField(default=False)
+    calls_made = models.BooleanField(default=False)
+    siren_activated = models.BooleanField(default=False)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    analyzed_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Video Analysis - {self.title}"
+    consecutive_frames_required = models.IntegerField(default=3)
+    enable_sms_alerts = models.BooleanField(default=True)
+    enable_email_alerts = models.BooleanField(default=True)
+    enable_siren = models.BooleanField(default=True)
+    siren_duration = models.IntegerField(default=30)  # seconds
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "System Configuration"
+        verbose_name_plural = "System Configurations"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one configuration exists
+        if not self.pk and SystemConfiguration.objects.exists():
+            raise ValueError("Only one SystemConfiguration instance is allowed")
+        return super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_config(cls):
+        config, created = cls.objects.get_or_create(
+            pk=cls.objects.first().pk if cls.objects.exists() else None
+        )
+        return config
+
+class VideoRecording(models.Model):
+    RECORDING_TYPES = [
+        ('continuous', 'Continuous Recording'),
+        ('motion_triggered', 'Motion Triggered'),
+        ('fire_incident', 'Fire Incident'),
+        ('manual', 'Manual Recording'),
+    ]
+    
+    QUALITY_CHOICES = [
+        ('low', 'Low Quality (480p)'),
+        ('medium', 'Medium Quality (720p)'),
+        ('high', 'High Quality (1080p)'),
+        ('ultra', 'Ultra Quality (4K)'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    camera = models.ForeignKey(Camera, on_delete=models.CASCADE, related_name='recordings')
+    fire_event = models.ForeignKey(FireDetectionEvent, on_delete=models.SET_NULL, null=True, blank=True, related_name='recordings')
+    file_path = models.FileField(upload_to='cctv_recordings/%Y/%m/%d/')
+    thumbnail_path = models.ImageField(upload_to='snapshots/%Y/%m/%d/', null=True, blank=True)
+    recording_type = models.CharField(max_length=20, choices=RECORDING_TYPES, default='continuous')
+    quality = models.CharField(max_length=10, choices=QUALITY_CHOICES, default='high')
+    duration = models.DurationField(null=True, blank=True)
+    file_size = models.BigIntegerField(null=True, blank=True)  # Size in bytes
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+    is_archived = models.BooleanField(default=False)
+    archived_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-start_time']
+        indexes = [
+            models.Index(fields=['camera', '-start_time']),
+            models.Index(fields=['recording_type', '-start_time']),
+            models.Index(fields=['fire_event']),
+        ]
+    
+    def __str__(self):
+        return f"{self.camera.name} - {self.start_time.strftime('%Y-%m-%d %H:%M:%S')} ({self.recording_type})"
+    
+    @property
+    def file_size_mb(self):
+        if self.file_size:
+            return round(self.file_size / (1024 * 1024), 2)
+        return 0
+    
+    def get_absolute_url(self):
+        return f"/media/{self.file_path}"

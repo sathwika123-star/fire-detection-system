@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Feeds - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Alert Banner -->
+    <div id="alert-banner" class="bg-red-600 text-white p-3 text-center font-bold animate-pulse" style="display: none;">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <span id="alert-text">🔥 SMOKE DETECTED on Camera 5! Confidence: 79%</span>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Mall Security Camera Feeds</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-gray-400">AI Detection Active</span>
+            </div>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-bell text-gray-400"></i>
+            </button>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-cog text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="index.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="camera-feeds.html" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="incident-history.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="analytics.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="emergency-contacts.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <!-- Camera Feeds Management -->
+            <div class="bg-gray-800 p-4 rounded-lg mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-camera text-blue-500 text-xl"></i>
+                        <h2 class="text-xl font-semibold">Camera Feeds Management</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-green-400 font-semibold">Live Monitoring</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Camera Controls -->
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-semibold">Camera Feeds Management</h2>
+                <div class="flex space-x-4">
+                    <button onclick="startAllCameras()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-play mr-2"></i>Start All Cameras
+                    </button>
+                    <button onclick="stopAllCameras()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-stop mr-2"></i>Stop All Cameras
+                    </button>
+                    <button onclick="refreshFeeds()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-sync mr-2"></i>Refresh Feeds
+                    </button>
+                    <button onclick="addCamera()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-plus mr-2"></i>Add Camera
+                    </button>
+                </div>
+            </div>
+
+            <!-- Camera Grid with Auto-Playing Videos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <!-- MALL_INSIDE - Fire Detection Video -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700">
+                    <div class="relative">
+                        <div class="w-full h-80 bg-black relative overflow-hidden">
+                            <!-- Dynamic Alert Overlay -->
+                            <div id="alert-mall-inside" class="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold z-10">
+                                ✓ SAFE
+                            </div>
+                            
+                            <!-- Recording Indicator -->
+                            <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold z-10">
+                                ● REC
+                            </div>
+                            
+                            <!-- Video Element -->
+                            <video id="video-mall-inside" class="w-full h-full object-cover" autoplay muted loop>
+                                <source src="../media/cctv_recordings/mall_inside.mp4" type="video/mp4">
+                                <!-- Fallback content -->
+                                <div class="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-fire text-6xl mb-4 text-orange-400"></i>
+                                        <p class="text-lg font-bold">MALL_INSIDE</p>
+                                        <p class="text-sm opacity-75">Mall Interior</p>
+                                    </div>
+                                </div>
+                            </video>
+                            
+                            <!-- Video Info Overlay -->
+                            <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs z-10">
+                                MALL_INSIDE • Mall Interior
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-semibold text-lg">MALL_INSIDE</h3>
+                            <span class="text-xs text-gray-400">1080p</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span id="confidence-mall-inside" class="text-green-400 font-bold">Confidence: 92.5%</span>
+                            <span class="text-gray-400">People: 3</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mb-3">
+                            <span id="stage-mall-inside">Stage: fire emergency</span> • 
+                            <span>Updated: 5:04:35 pm</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button id="alert-btn-mall-inside" class="bg-red-600 hover:bg-red-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-fire mr-1"></i>FIRE ACCIDENT
+                            </button>
+                            <button class="bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MART_001 - Fire Detection Video -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700">
+                    <div class="relative">
+                        <div class="w-full h-80 bg-black relative overflow-hidden">
+                            <!-- Dynamic Alert Overlay -->
+                            <div id="alert-mart" class="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold z-10">
+                                ✓ SAFE
+                            </div>
+                            
+                            <!-- Recording Indicator -->
+                            <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold z-10">
+                                ● REC
+                            </div>
+                            
+                            <!-- Video Element -->
+                            <video id="video-mart" class="w-full h-full object-cover" autoplay muted loop>
+                                <source src="../media/cctv_recordings/mart.mp4" type="video/mp4">
+                                <!-- Fallback content -->
+                                <div class="w-full h-full bg-gradient-to-br from-red-800 via-orange-700 to-red-900 flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                                        <i class="fas fa-fire text-4xl mb-4 animate-pulse text-red-400"></i>
+                                        <p class="text-lg font-bold">MART_001</p>
+                                        <p class="text-sm opacity-75">Mart Security</p>
+                                    </div>
+                                </div>
+                            </video>
+                            
+                            <!-- Video Info Overlay -->
+                            <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs z-10">
+                                MART_001 • Mart Security
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-semibold text-lg">MART_001</h3>
+                            <span class="text-xs text-gray-400">1080p</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span id="confidence-mart" class="text-green-400 font-bold">Confidence: 75.4%</span>
+                            <span class="text-gray-400">People: 2</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mb-3">
+                            <span id="stage-mart">Stage: fire emergency</span> • 
+                            <span>Updated: 5:04:35 pm</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button id="alert-btn-mart" class="bg-red-600 hover:bg-red-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-fire mr-1"></i>FIRE ACCIDENT
+                            </button>
+                            <button class="bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mall Escalator - Safe Video -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700">
+                    <div class="relative">
+                        <div class="w-full h-80 bg-black relative overflow-hidden">
+                            <!-- Dynamic Alert Overlay -->
+                            <div id="alert-escalator" class="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold z-10">
+                                ✓ SAFE
+                            </div>
+                            
+                            <!-- Recording Indicator -->
+                            <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold z-10">
+                                ● REC
+                            </div>
+                            
+                            <!-- Video Element -->
+                            <video id="video-escalator" class="w-full h-full object-cover" autoplay muted loop>
+                                <source src="../media/cctv_recordings/mall escalator.mp4" type="video/mp4">
+                                <!-- Fallback content -->
+                                <div class="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-building text-6xl mb-4 text-amber-200"></i>
+                                        <p class="text-lg font-bold">Mall Escalator</p>
+                                        <p class="text-sm opacity-75">Escalator Area</p>
+                                    </div>
+                                </div>
+                            </video>
+                            
+                            <!-- Video Info Overlay -->
+                            <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs z-10">
+                                Mall Escalator • Escalator Area
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-semibold text-lg">Mall Escalator</h3>
+                            <span class="text-xs text-gray-400">720p</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span id="confidence-escalator" class="text-green-400 font-bold">Confidence: 1%</span>
+                            <span class="text-gray-400">People: 8</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mb-3">
+                            <span id="stage-escalator">Stage: safe</span> • 
+                            <span>Updated: 4:56:47 pm</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button id="alert-btn-escalator" class="bg-green-600 hover:bg-green-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-check mr-1"></i>SAFE
+                            </button>
+                            <button class="bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mall First Floor - Safe Video -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700">
+                    <div class="relative">
+                        <div class="w-full h-80 bg-black relative overflow-hidden">
+                            <!-- Dynamic Alert Overlay -->
+                            <div id="alert-first-floor" class="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold z-10">
+                                ✓ SAFE
+                            </div>
+                            
+                            <!-- Recording Indicator -->
+                            <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold z-10">
+                                ● REC
+                            </div>
+                            
+                            <!-- Video Element -->
+                            <video id="video-first-floor" class="w-full h-full object-cover" autoplay muted loop>
+                                <source src="../media/cctv_recordings/mall first floor.mp4" type="video/mp4">
+                                <!-- Fallback content -->
+                                <div class="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-store text-6xl mb-4 text-blue-200"></i>
+                                        <p class="text-lg font-bold">Mall First Floor</p>
+                                        <p class="text-sm opacity-75">First Floor</p>
+                                    </div>
+                                </div>
+                            </video>
+                            
+                            <!-- Video Info Overlay -->
+                            <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs z-10">
+                                Mall First Floor • First Floor
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-semibold text-lg">Mall First Floor</h3>
+                            <span class="text-xs text-gray-400">1080p</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span id="confidence-first-floor" class="text-green-400 font-bold">Confidence: 2%</span>
+                            <span class="text-gray-400">People: 5</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mb-3">
+                            <span id="stage-first-floor">Stage: safe</span> • 
+                            <span>Updated: 5:04:13 pm</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button id="alert-btn-first-floor" class="bg-green-600 hover:bg-green-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-check mr-1"></i>SAFE
+                            </button>
+                            <button class="bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mall Front - Safe Video -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700">
+                    <div class="relative">
+                        <div class="w-full h-80 bg-black relative overflow-hidden">
+                            <!-- Dynamic Alert Overlay -->
+                            <div id="alert-mall-front" class="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold z-10">
+                                ✓ SAFE
+                            </div>
+                            
+                            <!-- Recording Indicator -->
+                            <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold z-10">
+                                ● REC
+                            </div>
+                            
+                            <!-- Video Element -->
+                            <video id="video-mall-front" class="w-full h-full object-cover" autoplay muted loop>
+                                <source src="../media/cctv_recordings/mall front.mp4" type="video/mp4">
+                                <!-- Fallback content -->
+                                <div class="w-full h-full bg-gradient-to-br from-green-800 to-green-900 flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-door-open text-6xl mb-4 text-green-200"></i>
+                                        <p class="text-lg font-bold">Mall Front</p>
+                                        <p class="text-sm opacity-75">Main Entrance</p>
+                                    </div>
+                                </div>
+                            </video>
+                            
+                            <!-- Video Info Overlay -->
+                            <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs z-10">
+                                Mall Front • Main Entrance
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-semibold text-lg">Mall Front</h3>
+                            <span class="text-xs text-gray-400">720p</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span id="confidence-mall-front" class="text-green-400 font-bold">Confidence: 1%</span>
+                            <span class="text-gray-400">People: 12</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mb-3">
+                            <span id="stage-mall-front">Stage: safe</span> • 
+                            <span>Updated: 5:04:13 pm</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button id="alert-btn-mall-front" class="bg-green-600 hover:bg-green-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-check mr-1"></i>SAFE
+                            </button>
+                            <button class="bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mall Total View - Safe Video -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700">
+                    <div class="relative">
+                        <div class="w-full h-80 bg-black relative overflow-hidden">
+                            <!-- Dynamic Alert Overlay -->
+                            <div id="alert-mall-total" class="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold z-10">
+                                ✓ SAFE
+                            </div>
+                            
+                            <!-- Recording Indicator -->
+                            <div class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold z-10">
+                                ● REC
+                            </div>
+                            
+                            <!-- Video Element -->
+                            <video id="video-mall-total" class="w-full h-full object-cover" autoplay muted loop>
+                                <source src="../media/cctv_recordings/mall total.mp4" type="video/mp4">
+                                <!-- Fallback content -->
+                                <div class="w-full h-full bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-building text-6xl mb-4 text-blue-200"></i>
+                                        <p class="text-lg font-bold">Mall Total View</p>
+                                        <p class="text-sm opacity-75">Overview Camera</p>
+                                    </div>
+                                </div>
+                            </video>
+                            
+                            <!-- Video Info Overlay -->
+                            <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs z-10">
+                                Mall Total View • Overview Camera
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-semibold text-lg">Mall Total View</h3>
+                            <span class="text-xs text-gray-400">1080p</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span id="confidence-mall-total" class="text-green-400 font-bold">Confidence: 0%</span>
+                            <span class="text-gray-400">People: 15</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mb-3">
+                            <span id="stage-mall-total">Stage: safe</span> • 
+                            <span>Updated: 5:04:13 pm</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button id="alert-btn-mall-total" class="bg-green-600 hover:bg-green-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-check mr-1"></i>SAFE
+                            </button>
+                            <button class="bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fire Detection System
+        let detectionActive = true;
+        let alertSound = null;
+        
+        // Initialize the fire detection system
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFireDetection();
+            bindControlButtons();
+            showAlertBanner();
+        });
+        
+        function initializeFireDetection() {
+            console.log('🔥 Fire Detection System Initialized');
+            
+            // Simulate real-time fire detection updates
+            setInterval(updateFireDetection, 3000);
+            
+            // Initialize alert banner for Camera 5 smoke detection
+            showAlertBanner();
+        }
+        
+        function showAlertBanner() {
+            const alertBanner = document.getElementById('alert-banner');
+            alertBanner.style.display = 'block';
+            
+            // Play alert sound simulation
+            playAlertSound();
+        }
+        
+        function playAlertSound() {
+            try {
+                // Create audio context for alert sound
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (e) {
+                console.log('Alert sound not available');
+            }
+        }
+        
+        function updateFireDetection() {
+            if (!detectionActive) return;
+            
+            // Simulate confidence updates for Camera 2 (Fire)
+            const cam2Confidence = 85 + Math.random() * 10; // 85-95%
+            const cam2Element = document.querySelector('[data-camera="cam-02"]');
+            if (cam2Element) {
+                const confidenceText = cam2Element.querySelector('.confidence-display');
+                if (confidenceText) {
+                    confidenceText.textContent = `🔥 FIRE ${Math.round(cam2Confidence)}%`;
+                }
+            }
+            
+            // Simulate confidence updates for Camera 5 (Smoke)
+            const cam5Confidence = 75 + Math.random() * 15; // 75-90%
+            const cam5Element = document.querySelector('[data-camera="cam-05"]');
+            if (cam5Element) {
+                const confidenceText = cam5Element.querySelector('.confidence-display');
+                if (confidenceText) {
+                    confidenceText.textContent = `🟠 SMOKE ${Math.round(cam5Confidence)}%`;
+                }
+            }
+            
+            // Update alert banner with current confidence
+            const alertText = document.getElementById('alert-text');
+            if (alertText) {
+                alertText.textContent = `🔥 SMOKE DETECTED on Camera 5! Confidence: ${Math.round(cam5Confidence)}%`;
+            }
+            
+            // Log detection activity
+            console.log(`🔍 Fire Detection Update - CAM-02: ${Math.round(cam2Confidence)}%, CAM-05: ${Math.round(cam5Confidence)}%`);
+        }
+        
+        function bindControlButtons() {
+            // Play All Videos
+            document.getElementById('playAll').addEventListener('click', function() {
+                console.log('▶️ Playing all camera feeds');
+                showNotification('All camera feeds started', 'success');
+                this.disabled = true;
+                document.getElementById('pauseAll').disabled = false;
+                
+                // Simulate video playback
+                simulateVideoPlayback();
+            });
+            
+            // Pause All Videos
+            document.getElementById('pauseAll').addEventListener('click', function() {
+                console.log('⏸️ Pausing all camera feeds');
+                showNotification('All camera feeds paused', 'warning');
+                this.disabled = true;
+                document.getElementById('playAll').disabled = false;
+            });
+            
+            // Mute All
+            document.getElementById('muteAll').addEventListener('click', function() {
+                console.log('🔇 Muting all camera feeds');
+                showNotification('All camera feeds muted', 'info');
+                this.classList.toggle('bg-orange-600');
+                this.classList.toggle('bg-green-600');
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-volume-mute');
+                icon.classList.toggle('fa-volume-up');
+            });
+            
+            // Fullscreen Mode
+            document.getElementById('fullscreen').addEventListener('click', function() {
+                console.log('🔍 Entering fullscreen mode');
+                showNotification('Entering fullscreen mode', 'info');
+                
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    document.documentElement.requestFullscreen();
+                }
+            });
+        }
+        
+        function simulateVideoPlayback() {
+            // Add playing indicators to cameras
+            const cameras = document.querySelectorAll('[data-camera]');
+            cameras.forEach(camera => {
+                const videoArea = camera.querySelector('.video-area');
+                if (videoArea) {
+                    videoArea.style.background = 'linear-gradient(45deg, #1f2937, #374151)';
+                    videoArea.innerHTML = '<i class="fas fa-play text-white text-2xl"></i>';
+                }
+            });
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white ${getNotificationColor(type)}`;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        function getNotificationColor(type) {
+            switch (type) {
+                case 'success': return 'bg-green-600';
+                case 'warning': return 'bg-orange-600';
+                case 'error': return 'bg-red-600';
+                default: return 'bg-blue-600';
+            }
+        }
+        
+        // Emergency Response Functions
+        function triggerEmergencyAlert() {
+            console.log('🚨 EMERGENCY ALERT TRIGGERED');
+            showNotification('Emergency alert activated!', 'error');
+            
+            // Show emergency modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-red-600 p-8 rounded-lg text-center animate-pulse max-w-md">
+                    <i class="fas fa-exclamation-triangle text-6xl text-white mb-4"></i>
+                    <h2 class="text-2xl font-bold text-white mb-4">EMERGENCY PROTOCOL ACTIVATED</h2>
+                    <div class="space-y-2 text-white mb-6">
+                        <p>🚨 Emergency services contacted</p>
+                        <p>📱 SMS alerts sent to all staff</p>
+                        <p>📧 Email notifications sent</p>
+                        <p>🔊 Building evacuation announced</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="bg-white text-red-600 px-6 py-2 rounded-lg font-bold">
+                        ACKNOWLEDGE
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (document.body.contains(modal)) {
+                    modal.remove();
+                }
+            }, 10000);
+        }
+        
+        // Detection simulation data for each video
+        const videoDetectionData = {
+            'video-mall-inside': [
+                { start: 0, end: 7, type: 'safe', confidence: 2, stage: 'safe' },
+                { start: 7, end: 15, type: 'smoke', confidence: 45, stage: 'smoke detected' },
+                { start: 15, end: 27, type: 'fire', confidence: 92.5, stage: 'fire emergency' }
+            ],
+            'video-mart': [
+                { start: 0, end: 20, type: 'safe', confidence: 5, stage: 'safe' },
+                { start: 20, end: 40, type: 'smoke', confidence: 35, stage: 'smoke detected' },
+                { start: 40, end: 185, type: 'fire', confidence: 70.4, stage: 'fire emergency' }
+            ],
+            'video-escalator': [
+                { start: 0, end: 13, type: 'safe', confidence: 1, stage: 'safe' }
+            ],
+            'video-first-floor': [
+                { start: 0, end: 15, type: 'safe', confidence: 2, stage: 'safe' }
+            ],
+            'video-mall-front': [
+                { start: 0, end: 12, type: 'safe', confidence: 1, stage: 'safe' }
+            ],
+            'video-mall-total': [
+                { start: 0, end: 14, type: 'safe', confidence: 0, stage: 'safe' }
+            ]
+        };
+
+        function updateDetectionStatus(videoId, currentTime) {
+            const ranges = videoDetectionData[videoId];
+            if (!ranges) return;
+            const range = ranges.find(r => currentTime >= r.start && currentTime <= r.end);
+            if (!range) return;
+            const alert = document.getElementById(`alert-${videoId.replace('video-', '')}`);
+            const confidence = document.getElementById(`confidence-${videoId.replace('video-', '')}`);
+            const stage = document.getElementById(`stage-${videoId.replace('video-', '')}`);
+            const alertBtn = document.getElementById(`alert-btn-${videoId.replace('video-', '')}`);
+            if (range.type === 'fire') {
+                alert.className = 'absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold z-10 animate-pulse';
+                alert.innerHTML = '🔥 FIRE ACCIDENT';
+                confidence.className = 'text-red-400 font-bold';
+                confidence.textContent = `Confidence: ${range.confidence}%`;
+                stage.textContent = 'Stage: fire emergency';
+                alertBtn.className = 'bg-red-600 hover:bg-red-700 py-2 px-3 rounded text-sm';
+                alertBtn.innerHTML = '<i class="fas fa-fire mr-1"></i>FIRE ACCIDENT';
+            } else if (range.type === 'smoke') {
+                alert.className = 'absolute top-2 right-2 bg-yellow-600 text-white px-3 py-1 rounded text-sm font-bold z-10 animate-pulse';
+                alert.innerHTML = '🟠 SMOKE ALERT';
+                confidence.className = 'text-yellow-400 font-bold';
+                confidence.textContent = `Confidence: ${range.confidence}%`;
+                stage.textContent = 'Stage: smoke detected';
+                alertBtn.className = 'bg-yellow-600 hover:bg-yellow-700 py-2 px-3 rounded text-sm';
+                alertBtn.innerHTML = '<i class="fas fa-cloud mr-1"></i>SMOKE ALERT';
+            } else {
+                alert.className = 'absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded text-sm font-bold z-10';
+                alert.innerHTML = '✓ SAFE';
+                confidence.className = 'text-green-400 font-bold';
+                confidence.textContent = `Confidence: ${range.confidence}%`;
+                stage.textContent = 'Stage: safe';
+                alertBtn.className = 'bg-green-600 hover:bg-green-700 py-2 px-3 rounded text-sm';
+                alertBtn.innerHTML = '<i class="fas fa-check mr-1"></i>SAFE';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            Object.keys(videoDetectionData).forEach(videoId => {
+                const video = document.getElementById(videoId);
+                if (video) {
+                    video.addEventListener('timeupdate', function() {
+                        updateDetectionStatus(videoId, this.currentTime);
+                    });
+                    video.addEventListener('loadeddata', function() {
+                        this.play().catch(() => {});
+                    });
+                }
+            });
+        });
+
+        function startAllCameras() {
+            Object.keys(videoDetectionData).forEach(videoId => {
+                const video = document.getElementById(videoId);
+                if (video) video.play();
+            });
+        }
+        function stopAllCameras() {
+            Object.keys(videoDetectionData).forEach(videoId => {
+                const video = document.getElementById(videoId);
+                if (video) video.pause();
+            });
+        }
+        function refreshFeeds() {
+            location.reload();
+        }
+        function addCamera() {
+            alert('Camera addition functionality coming soon!');
+        }
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>

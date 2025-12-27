@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">System Reports</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-gray-400">System Online</span>
+            </div>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-bell text-gray-400"></i>
+            </button>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-cog text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="index.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="camera-feeds.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="incident-history.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="analytics.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="emergency-contacts.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <!-- Report Generator -->
+            <div class="bg-gray-800 p-6 rounded-lg mb-6">
+                <h2 class="text-xl font-semibold mb-4">Generate Custom Report</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Report Type</label>
+                        <select class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                            <option>Fire Incident Summary</option>
+                            <option>System Performance</option>
+                            <option>Camera Status Report</option>
+                            <option>Response Time Analysis</option>
+                            <option>Monthly Overview</option>
+                            <option>Compliance Report</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Date Range</label>
+                        <select class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                            <option>Last 7 days</option>
+                            <option>Last 30 days</option>
+                            <option>Last 90 days</option>
+                            <option>Custom Range</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Format</label>
+                        <select class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                            <option>PDF</option>
+                            <option>Excel</option>
+                            <option>CSV</option>
+                            <option>JSON</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg">
+                        <i class="fas fa-chart-bar mr-2"></i>Generate Report
+                    </button>
+                    <button class="bg-gray-600 hover:bg-gray-700 px-6 py-2 rounded-lg">
+                        <i class="fas fa-calendar mr-2"></i>Schedule Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Report Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Daily Report -->
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Daily Report</h3>
+                        <i class="fas fa-calendar-day text-blue-500 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Today's fire detection activity and system performance summary.</p>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-sm">Incidents:</span>
+                            <span class="text-sm font-bold">3</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">False Alarms:</span>
+                            <span class="text-sm font-bold">1</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Avg Response:</span>
+                            <span class="text-sm font-bold">1.8m</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                            <i class="fas fa-eye mr-1"></i>View
+                        </button>
+                        <button class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                            <i class="fas fa-download mr-1"></i>Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Weekly Report -->
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Weekly Report</h3>
+                        <i class="fas fa-calendar-week text-green-500 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Last 7 days performance metrics and incident analysis.</p>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-sm">Total Incidents:</span>
+                            <span class="text-sm font-bold">18</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Accuracy:</span>
+                            <span class="text-sm font-bold">97.2%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Uptime:</span>
+                            <span class="text-sm font-bold">99.8%</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                            <i class="fas fa-eye mr-1"></i>View
+                        </button>
+                        <button class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                            <i class="fas fa-download mr-1"></i>Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Monthly Report -->
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Monthly Report</h3>
+                        <i class="fas fa-calendar-alt text-purple-500 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Comprehensive monthly analysis and compliance report.</p>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-sm">Total Incidents:</span>
+                            <span class="text-sm font-bold">74</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Resolved:</span>
+                            <span class="text-sm font-bold">72</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Performance:</span>
+                            <span class="text-sm font-bold">Excellent</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 px-3 rounded text-sm">
+                            <i class="fas fa-eye mr-1"></i>View
+                        </button>
+                        <button class="flex-1 bg-gray-600 hover:bg-gray-700 py-2 px-3 rounded text-sm">
+                            <i class="fas fa-download mr-1"></i>Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report History -->
+            <div class="bg-gray-800 rounded-lg overflow-hidden mb-6">
+                <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">Recent Reports</h3>
+                    <div class="flex space-x-2">
+                        <button class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
+                            <i class="fas fa-filter mr-1"></i>Filter
+                        </button>
+                        <button class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">
+                            <i class="fas fa-archive mr-1"></i>Archive
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Report Name</th>
+                                <th class="px-4 py-3 text-left">Type</th>
+                                <th class="px-4 py-3 text-left">Generated</th>
+                                <th class="px-4 py-3 text-left">Period</th>
+                                <th class="px-4 py-3 text-left">Size</th>
+                                <th class="px-4 py-3 text-left">Status</th>
+                                <th class="px-4 py-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Fire Incident Summary</div>
+                                        <div class="text-sm text-gray-400">incident_summary_aug_2025.pdf</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-red-600 text-white px-2 py-1 rounded text-xs">
+                                        Incident
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Aug 24, 2025</div>
+                                        <div class="text-sm text-gray-400">16:30:15</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">Aug 1-24, 2025</td>
+                                <td class="px-4 py-3">2.4 MB</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-green-500">● Ready</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">System Performance</div>
+                                        <div class="text-sm text-gray-400">performance_weekly_aug_w4.xlsx</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs">
+                                        Performance
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Aug 23, 2025</div>
+                                        <div class="text-sm text-gray-400">09:00:00</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">Aug 17-23, 2025</td>
+                                <td class="px-4 py-3">892 KB</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-green-500">● Ready</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Camera Status Report</div>
+                                        <div class="text-sm text-gray-400">camera_status_daily.json</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-green-600 text-white px-2 py-1 rounded text-xs">
+                                        System
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Aug 23, 2025</div>
+                                        <div class="text-sm text-gray-400">00:05:00</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">Aug 22, 2025</td>
+                                <td class="px-4 py-3">124 KB</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-yellow-500">● Processing</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="bg-gray-500 px-2 py-1 rounded text-xs" disabled>
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="bg-gray-500 px-2 py-1 rounded text-xs" disabled>
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Compliance Report</div>
+                                        <div class="text-sm text-gray-400">compliance_q3_2025.pdf</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-purple-600 text-white px-2 py-1 rounded text-xs">
+                                        Compliance
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Aug 20, 2025</div>
+                                        <div class="text-sm text-gray-400">14:30:22</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">Jul 1 - Sep 30, 2025</td>
+                                <td class="px-4 py-3">5.7 MB</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-green-500">● Ready</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Scheduled Reports -->
+            <div class="bg-gray-800 rounded-lg">
+                <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">Scheduled Reports</h3>
+                    <button class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
+                        <i class="fas fa-plus mr-1"></i>Add Schedule
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                            <div>
+                                <div class="font-medium">Daily Incident Summary</div>
+                                <div class="text-sm text-gray-400">Generated every day at 00:05 AM</div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-green-500 text-sm">● Active</span>
+                                <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                            <div>
+                                <div class="font-medium">Weekly Performance Report</div>
+                                <div class="text-sm text-gray-400">Generated every Monday at 09:00 AM</div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-green-500 text-sm">● Active</span>
+                                <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                            <div>
+                                <div class="font-medium">Monthly Compliance Report</div>
+                                <div class="text-sm text-gray-400">Generated on the 1st of each month</div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-yellow-500 text-sm">● Paused</span>
+                                <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

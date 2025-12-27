@@ -1,0 +1,443 @@
+/* Custom styles for the Fire Detection System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+/* Emergency active state for entire page */
+body.emergency-active {
+    background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+    animation: emergencyFlash 2s infinite;
+}
+
+@keyframes emergencyFlash {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.1);
+    }
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.3s ease;
+}
+
+/* Enhanced button interactions */
+button {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Button ripple effect */
+button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+button:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Emergency button special effects */
+.emergency-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.emergency-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(239, 68, 68, 0.3);
+}
+
+.emergency-btn:active {
+    animation: emergencyButtonPress 0.3s ease;
+}
+
+@keyframes emergencyButtonPress {
+    0% { transform: scale(1.02); }
+    50% { transform: scale(0.98); }
+    100% { transform: scale(1.02); }
+}
+
+/* Status badge animations */
+#statusBadge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Fire detected animation */
+.fire-detected {
+    animation: fireGlow 1.5s infinite alternate;
+}
+
+@keyframes fireGlow {
+    from {
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+    }
+    to {
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.8);
+    }
+}
+
+/* Enhanced emergency glow for camera feeds */
+.emergency-glow {
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+    animation: emergencyPulse 1s infinite;
+    border: 2px solid #ef4444;
+}
+
+@keyframes emergencyPulse {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+        border-color: #ef4444;
+    }
+    50% {
+        box-shadow: 0 0 50px rgba(239, 68, 68, 0.9);
+        border-color: #fca5a5;
+    }
+}
+
+/* Camera feed hover effects */
+.camera-feed {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.camera-feed:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.camera-feed:hover:not(.emergency-glow) {
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Incident row hover effects */
+.incident-row:hover {
+    background-color: rgba(55, 65, 81, 0.5);
+    border-radius: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #374151;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Severity bar animation */
+#severityBar {
+    transition: width 0.5s ease-in-out;
+}
+
+/* Modal enhancements */
+.modal-overlay {
+    backdrop-filter: blur(4px);
+}
+
+/* Emergency modal animation */
+#emergencyModal.flex {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+#sirenModal.show {
+    display: flex !important;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Live feed border when fire detected */
+.fire-border {
+    border: 3px solid #ef4444;
+    border-radius: 0.5rem;
+}
+
+/* Status indicators */
+.status-safe {
+    background-color: #10b981;
+}
+
+.status-warning {
+    background-color: #f59e0b;
+}
+
+.status-danger {
+    background-color: #ef4444;
+}
+
+/* Notification improvements */
+.notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: notificationPulse 2s infinite;
+}
+
+@keyframes notificationPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Navigation link hover effects */
+nav a {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+nav a:hover {
+    transform: translateX(5px);
+}
+
+nav a::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #3b82f6;
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+nav a:hover::before {
+    transform: scaleY(1);
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+    .w-96 {
+        width: 20rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .flex {
+        flex-direction: column;
+    }
+    
+    .w-96 {
+        width: 100%;
+    }
+    
+    .h-screen {
+        height: auto;
+    }
+    
+    button:hover {
+        transform: none;
+    }
+}
+
+/* Loading animation */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Custom fire icon animation */
+.fire-icon {
+    animation: fireFlicker 0.5s infinite alternate;
+}
+
+@keyframes fireFlicker {
+    0% {
+        transform: scale(1) rotate(-1deg);
+    }
+    100% {
+        transform: scale(1.1) rotate(1deg);
+    }
+}
+
+/* Alert sound wave animation */
+.sound-wave {
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background: #ef4444;
+    margin: 0 1px;
+    animation: soundWave 0.6s infinite ease-in-out;
+}
+
+.sound-wave:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.sound-wave:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+@keyframes soundWave {
+    0%, 100% {
+        height: 20px;
+    }
+    50% {
+        height: 5px;
+    }
+}
+
+/* Enhanced stats cards */
+.stats-card {
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Custom toggle switches */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #4b5563;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #3b82f6;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* Success message animation */
+.success-message {
+    animation: successSlide 0.5s ease-out;
+}
+
+@keyframes successSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

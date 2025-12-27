@@ -1,0 +1,63 @@
+# Python
+*.py[cod]
+*$py.class
+*.so
+__pycache__/
+*.egg
+*.egg-info/
+dist/
+build/
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+media/uploaded_videos/
+staticfiles/
+static/CACHE/
+
+# Database
+*.db
+fire_detection_system.db
+fire_detection_enhanced.db
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+
+# AI Models (if large)
+# yolov8n.pt
+
+# Media uploads
+media/uploaded_videos/*
+media/incident_snapshots/*
+!media/.gitkeep
+
+# Temporary files
+*.tmp
+*.bak
+*.cache

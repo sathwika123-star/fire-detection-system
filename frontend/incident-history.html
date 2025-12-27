@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident History - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Incident History</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-gray-400">System Online</span>
+            </div>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-bell text-gray-400"></i>
+            </button>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-cog text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="index.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="camera-feeds.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="incident-history.html" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="analytics.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="emergency-contacts.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <!-- Filters and Search -->
+            <div class="bg-gray-800 p-4 rounded-lg mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex space-x-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Date Range</label>
+                            <select class="bg-gray-700 text-white rounded px-3 py-2">
+                                <option>Last 7 days</option>
+                                <option>Last 30 days</option>
+                                <option>Last 90 days</option>
+                                <option>All time</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Status</label>
+                            <select class="bg-gray-700 text-white rounded px-3 py-2">
+                                <option>All</option>
+                                <option>Active</option>
+                                <option>Resolved</option>
+                                <option>False Alarm</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Severity</label>
+                            <select class="bg-gray-700 text-white rounded px-3 py-2">
+                                <option>All</option>
+                                <option>Critical</option>
+                                <option>High</option>
+                                <option>Medium</option>
+                                <option>Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <input type="text" placeholder="Search incidents..." class="bg-gray-700 text-white rounded px-3 py-2 w-64">
+                        <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Total Incidents</p>
+                            <p class="text-2xl font-bold">47</p>
+                        </div>
+                        <i class="fas fa-fire text-red-500 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Resolved</p>
+                            <p class="text-2xl font-bold text-green-500">42</p>
+                        </div>
+                        <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">False Alarms</p>
+                            <p class="text-2xl font-bold text-yellow-500">12</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Avg Response</p>
+                            <p class="text-2xl font-bold text-blue-500">3.2m</p>
+                        </div>
+                        <i class="fas fa-clock text-blue-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incidents Table -->
+            <div class="bg-gray-800 rounded-lg overflow-hidden">
+                <div class="p-4 border-b border-gray-700">
+                    <h3 class="text-lg font-semibold">Recent Incidents</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Date/Time</th>
+                                <th class="px-4 py-3 text-left">Location</th>
+                                <th class="px-4 py-3 text-left">Severity</th>
+                                <th class="px-4 py-3 text-left">Confidence</th>
+                                <th class="px-4 py-3 text-left">Status</th>
+                                <th class="px-4 py-3 text-left">Response Time</th>
+                                <th class="px-4 py-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Aug 24, 2025</div>
+                                        <div class="text-sm text-gray-400">16:45:32</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Block A - Lab 3</div>
+                                        <div class="text-sm text-gray-400">Camera A3-001</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
+                                        CRITICAL
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center">
+                                        <div class="w-16 bg-gray-600 rounded-full h-2 mr-2">
+                                            <div class="bg-red-500 h-2 rounded-full" style="width: 95%"></div>
+                                        </div>
+                                        <span class="text-sm">95%</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-red-600 text-white px-2 py-1 rounded text-xs">
+                                        ACTIVE
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="text-red-500">-</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-flag"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Aug 24, 2025</div>
+                                        <div class="text-sm text-gray-400">14:23:15</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Block C - Kitchen</div>
+                                        <div class="text-sm text-gray-400">Camera C1-005</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">
+                                        HIGH
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center">
+                                        <div class="w-16 bg-gray-600 rounded-full h-2 mr-2">
+                                            <div class="bg-orange-500 h-2 rounded-full" style="width: 78%"></div>
+                                        </div>
+                                        <span class="text-sm">78%</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-green-600 text-white px-2 py-1 rounded text-xs">
+                                        RESOLVED
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="text-green-500">2m 45s</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Aug 24, 2025</div>
+                                        <div class="text-sm text-gray-400">12:15:08</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Block B - Corridor</div>
+                                        <div class="text-sm text-gray-400">Camera B2-003</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-yellow-600 text-white px-2 py-1 rounded text-xs font-bold">
+                                        MEDIUM
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center">
+                                        <div class="w-16 bg-gray-600 rounded-full h-2 mr-2">
+                                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 45%"></div>
+                                        </div>
+                                        <span class="text-sm">45%</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-gray-600 text-white px-2 py-1 rounded text-xs">
+                                        FALSE ALARM
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="text-blue-500">1m 12s</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Aug 23, 2025</div>
+                                        <div class="text-sm text-gray-400">09:30:22</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <div class="font-medium">Block A - Office</div>
+                                        <div class="text-sm text-gray-400">Camera A2-004</div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">
+                                        LOW
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center">
+                                        <div class="w-16 bg-gray-600 rounded-full h-2 mr-2">
+                                            <div class="bg-green-500 h-2 rounded-full" style="width: 25%"></div>
+                                        </div>
+                                        <span class="text-sm">25%</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="bg-gray-600 text-white px-2 py-1 rounded text-xs">
+                                        FALSE ALARM
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="text-blue-500">45s</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="p-4 border-t border-gray-700 flex items-center justify-between">
+                    <div class="text-sm text-gray-400">
+                        Showing 1 to 4 of 47 incidents
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">
+                            Previous
+                        </button>
+                        <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                            1
+                        </button>
+                        <button class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">
+                            2
+                        </button>
+                        <button class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">
+                            3
+                        </button>
+                        <button class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

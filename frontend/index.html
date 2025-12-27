@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Detection System - Frontend</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <i class="fas fa-fire text-red-500 text-6xl mb-4"></i>
+            <h1 class="text-4xl font-bold mb-4">Fire Detection System</h1>
+            <p class="text-xl text-gray-400 mb-8">Advanced AI-Powered Fire Detection & Emergency Response</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Dashboard -->
+            <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-tachometer-alt text-blue-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Main Dashboard</h3>
+                    <p class="text-gray-400 mb-4">Complete fire detection control panel</p>
+                    <a href="dashboard.html" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg inline-block">
+                        Launch Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Camera Feeds -->
+            <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-camera text-green-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Camera Feeds</h3>
+                    <p class="text-gray-400 mb-4">Live monitoring from all cameras</p>
+                    <a href="pages/camera-feeds.html" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg inline-block">
+                        View Cameras
+                    </a>
+                </div>
+            </div>
+
+            <!-- Analytics -->
+            <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-chart-line text-purple-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Analytics</h3>
+                    <p class="text-gray-400 mb-4">System performance and statistics</p>
+                    <a href="pages/analytics.html" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg inline-block">
+                        View Analytics
+                    </a>
+                </div>
+            </div>
+
+            <!-- Incident History -->
+            <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-history text-yellow-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Incident History</h3>
+                    <p class="text-gray-400 mb-4">Past fire detection events</p>
+                    <a href="pages/incident-history.html" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-lg inline-block">
+                        View History
+                    </a>
+                </div>
+            </div>
+
+            <!-- Emergency Contacts -->
+            <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-users text-orange-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Emergency Contacts</h3>
+                    <p class="text-gray-400 mb-4">Manage emergency response team</p>
+                    <a href="pages/emergency-contacts.html" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg inline-block">
+                        View Contacts
+                    </a>
+                </div>
+            </div>
+
+            <!-- Reports -->
+            <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-file-alt text-indigo-500 text-4xl mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Reports</h3>
+                    <p class="text-gray-400 mb-4">Generate system reports</p>
+                    <a href="pages/reports.html" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg inline-block">
+                        View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-2xl font-semibold mb-4">System Status</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-500">12</div>
+                    <div class="text-gray-400">Active Cameras</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-500">0</div>
+                    <div class="text-gray-400">Current Incidents</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-500">3</div>
+                    <div class="text-gray-400">Today's Alerts</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-500">99.8%</div>
+                    <div class="text-gray-400">System Uptime</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

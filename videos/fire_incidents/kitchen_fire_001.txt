@@ -1,0 +1,15 @@
+# Fire Incident Video #1
+# Filename: kitchen_fire_001.mp4
+# Duration: 45 seconds
+# Resolution: 1280x720
+# Fire Detection: POSITIVE (Confidence: 89%)
+# Location: Kitchen Area
+# Timestamp: 2025-08-26 10:30:00
+# Emergency Response: TRIGGERED
+# 
+# Description: Kitchen stove fire incident
+# Frame Analysis: Fire detected at 0:12, 0:18, 0:25, 0:31
+# Peak Confidence: 92% at 0:25
+# 
+# Use this metadata for testing purposes
+# Actual video file would be located here

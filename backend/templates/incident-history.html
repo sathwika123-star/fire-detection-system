@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident History - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Incident History</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="exportBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                <i class="fas fa-download mr-2"></i>Export
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'index' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-video"></i>
+                            <span>Live Monitoring</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'camera-feeds' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'incident-history' %}" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'analytics' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'emergency-contacts' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'reports' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <!-- Filters -->
+            <div class="bg-gray-800 p-4 rounded-lg mb-6">
+                <h3 class="text-lg font-semibold mb-4">Filter Incidents</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Date Range</label>
+                        <select id="dateFilter" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Location</label>
+                        <select id="locationFilter" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2">
+                            <option value="all">All Locations</option>
+                            <option value="mall-inside">Mall Inside</option>
+                            <option value="mart">Mart Area</option>
+                            <option value="mall-escalator">Mall Escalator</option>
+                            <option value="mall-first-floor">Mall First Floor</option>
+                            <option value="mall-front">Mall Front Entrance</option>
+                            <option value="mall-total">Mall Total Area</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Severity</label>
+                        <select id="severityFilter" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2">
+                            <option value="all">All Severities</option>
+                            <option value="high">High (80%+)</option>
+                            <option value="medium">Medium (50-80%)</option>
+                            <option value="low">Low (<50%)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Status</label>
+                        <select id="statusFilter" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2">
+                            <option value="all">All Status</option>
+                            <option value="resolved">Fire Resolved</option>
+                            <option value="safe">Safe</option>
+                            <option value="false-alarm">False Alarm</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incidents Table -->
+            <div class="bg-gray-800 rounded-lg overflow-hidden">
+                <div class="p-4 border-b border-gray-700">
+                    <h3 class="text-lg font-semibold">Recent Incidents</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date & Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Location</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Severity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">People</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Response Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidentsTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                            <!-- Table rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <div class="text-sm text-gray-400">
+                    Showing <span id="showingCount">1-10</span> of <span id="totalCount">25</span> incidents
+                </div>
+                <div class="flex space-x-2">
+                    <button id="prevBtn" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg">Previous</button>
+                    <button id="nextBtn" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incident Details Modal -->
+    <div id="incidentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 p-6 rounded-lg max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-white">Incident Details</h3>
+                <button onclick="closeIncidentModal()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="incidentDetails">
+                <!-- Details will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class IncidentHistoryManager {
+            constructor() {
+                this.incidents = [
+                    {
+                        id: 1,
+                        datetime: "2025-09-05 14:30:25",
+                        location: "Mall Inside",
+                        severity: 92,
+                        people: 3,
+                        status: "resolved",
+                        responseTime: "35s",
+                        description: "Fire detected in mall interior area",
+                        actions: ["SMS sent", "Email sent", "Emergency services contacted"],
+                        snapshot: "mall_inside_incident.jpg"
+                    },
+                    {
+                        id: 2,
+                        datetime: "2025-09-05 13:15:12",
+                        location: "Mart Area",
+                        severity: 88,
+                        people: 8,
+                        status: "resolved",
+                        responseTime: "32s",
+                        description: "Fire outbreak detected in retail mart section",
+                        actions: ["SMS sent", "Building evacuation", "Fire suppression activated"],
+                        snapshot: "mart_incident.jpg"
+                    },
+                    {
+                        id: 3,
+                        datetime: "2025-09-05 11:22:45",
+                        location: "Mall Escalator",
+                        severity: 15,
+                        people: 2,
+                        status: "false-alarm",
+                        responseTime: "28s",
+                        description: "Safe monitoring - No fire detected",
+                        actions: ["Routine surveillance", "All clear status"],
+                        snapshot: "escalator_safe.jpg"
+                    },
+                    {
+                        id: 4,
+                        datetime: "2025-09-05 09:45:18",
+                        location: "Mall First Floor",
+                        severity: 12,
+                        people: 5,
+                        status: "safe",
+                        responseTime: "25s",
+                        description: "Normal monitoring - No incidents detected",
+                        actions: ["Continuous monitoring", "Safe status confirmed"],
+                        snapshot: "first_floor_safe.jpg"
+                    },
+                    {
+                        id: 5,
+                        datetime: "2025-09-04 16:20:33",
+                        location: "Mall Front Entrance",
+                        severity: 10,
+                        people: 15,
+                        status: "safe",
+                        responseTime: "22s",
+                        description: "Normal operations - No fire detected",
+                        actions: ["Visual confirmation", "Safe status"],
+                        snapshot: "front_entrance_safe.jpg"
+                    },
+                    {
+                        id: 6,
+                        datetime: "2025-09-04 14:45:20",
+                        location: "Mall Total Area",
+                        severity: 8,
+                        people: 12,
+                        status: "safe",
+                        responseTime: "30s",
+                        description: "Overall mall monitoring - All areas safe",
+                        actions: ["Comprehensive scan", "All clear"],
+                        snapshot: "mall_total_safe.jpg"
+                    }
+                ];
+                
+                this.currentPage = 1;
+                this.itemsPerPage = 10;
+                this.filteredIncidents = [...this.incidents];
+                
+                this.init();
+            }
+
+            init() {
+                this.renderTable();
+                this.bindEvents();
+                this.updatePagination();
+            }
+
+            bindEvents() {
+                // Filter events
+                document.getElementById('dateFilter').addEventListener('change', () => this.applyFilters());
+                document.getElementById('locationFilter').addEventListener('change', () => this.applyFilters());
+                document.getElementById('severityFilter').addEventListener('change', () => this.applyFilters());
+                document.getElementById('statusFilter').addEventListener('change', () => this.applyFilters());
+
+                // Pagination events
+                document.getElementById('prevBtn').addEventListener('click', () => this.previousPage());
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextPage());
+
+                // Export button
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
+            }
+
+            renderTable() {
+                const tbody = document.getElementById('incidentsTableBody');
+                tbody.innerHTML = '';
+
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                const endIndex = startIndex + this.itemsPerPage;
+                const pageIncidents = this.filteredIncidents.slice(startIndex, endIndex);
+
+                pageIncidents.forEach(incident => {
+                    const row = this.createTableRow(incident);
+                    tbody.appendChild(row);
+                });
+
+                this.updatePagination();
+            }
+
+            createTableRow(incident) {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-700 cursor-pointer';
+                
+                const severityColor = incident.severity >= 80 ? 'text-red-400' : 
+                                    incident.severity >= 50 ? 'text-yellow-400' : 'text-green-400';
+                
+                const statusColor = {
+                    'resolved': 'text-green-400',
+                    'safe': 'text-blue-400',
+                    'false-alarm': 'text-gray-400'
+                }[incident.status];
+
+                const statusBadge = {
+                    'resolved': 'bg-green-600',
+                    'safe': 'bg-blue-600',
+                    'false-alarm': 'bg-gray-600'
+                }[incident.status];
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${incident.datetime}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${incident.location}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${severityColor}">${incident.severity}%</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${incident.people}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="${statusBadge} text-white px-2 py-1 rounded-full text-xs">
+                            ${incident.status.replace('-', ' ').toUpperCase()}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${incident.responseTime}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                        <button onclick="viewIncident(${incident.id})" class="text-blue-400 hover:text-blue-300">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="downloadSnapshot(${incident.id})" class="text-green-400 hover:text-green-300">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button onclick="generateReport(${incident.id})" class="text-yellow-400 hover:text-yellow-300">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                    </td>
+                `;
+
+                row.addEventListener('click', () => this.viewIncidentDetails(incident.id));
+                return row;
+            }
+
+            applyFilters() {
+                const dateFilter = document.getElementById('dateFilter').value;
+                const locationFilter = document.getElementById('locationFilter').value;
+                const severityFilter = document.getElementById('severityFilter').value;
+                const statusFilter = document.getElementById('statusFilter').value;
+
+                this.filteredIncidents = this.incidents.filter(incident => {
+                    // Date filter logic
+                    let dateMatch = true;
+                    if (dateFilter === 'today') {
+                        dateMatch = incident.datetime.startsWith('2025-09-05');
+                    } else if (dateFilter === 'week') {
+                        dateMatch = incident.datetime.startsWith('2025-09-04') || incident.datetime.startsWith('2025-09-05');
+                    }
+
+                    // Location filter - handle video-based locations
+                    let locationMatch = locationFilter === 'all';
+                    if (!locationMatch) {
+                        const locationMap = {
+                            'mall-inside': 'Mall Inside',
+                            'mart': 'Mart Area',
+                            'mall-escalator': 'Mall Escalator',
+                            'mall-first-floor': 'Mall First Floor',
+                            'mall-front': 'Mall Front Entrance',
+                            'mall-total': 'Mall Total Area'
+                        };
+                        locationMatch = incident.location === locationMap[locationFilter];
+                    }
+
+                    // Severity filter
+                    let severityMatch = true;
+                    if (severityFilter === 'high') severityMatch = incident.severity >= 80;
+                    else if (severityFilter === 'medium') severityMatch = incident.severity >= 50 && incident.severity < 80;
+                    else if (severityFilter === 'low') severityMatch = incident.severity < 50;
+
+                    // Status filter - handle new statuses
+                    let statusMatch = statusFilter === 'all' || incident.status === statusFilter;
+
+                    return dateMatch && locationMatch && severityMatch && statusMatch;
+                });
+
+                this.currentPage = 1;
+                this.renderTable();
+            }
+
+            viewIncidentDetails(id) {
+                const incident = this.incidents.find(i => i.id === id);
+                if (!incident) return;
+
+                const modal = document.getElementById('incidentModal');
+                const details = document.getElementById('incidentDetails');
+
+                const severityColor = incident.severity >= 80 ? 'text-red-400' : 
+                                    incident.severity >= 50 ? 'text-yellow-400' : 'text-green-400';
+
+                details.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-3">Incident Information</h4>
+                            <div class="space-y-2 text-sm">
+                                <div><span class="text-gray-400">ID:</span> #${incident.id}</div>
+                                <div><span class="text-gray-400">Date & Time:</span> ${incident.datetime}</div>
+                                <div><span class="text-gray-400">Location:</span> ${incident.location}</div>
+                                <div><span class="text-gray-400">Severity:</span> <span class="${severityColor}">${incident.severity}%</span></div>
+                                <div><span class="text-gray-400">People Count:</span> ${incident.people}</div>
+                                <div><span class="text-gray-400">Response Time:</span> ${incident.responseTime}</div>
+                                <div><span class="text-gray-400">Status:</span> ${incident.status.replace('-', ' ').toUpperCase()}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-3">Description</h4>
+                            <p class="text-sm text-gray-300 mb-4">${incident.description}</p>
+                            
+                            <h4 class="font-semibold mb-3">Actions Taken</h4>
+                            <ul class="text-sm text-gray-300 space-y-1">
+                                ${incident.actions.map(action => `<li>• ${action}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex space-x-4">
+                        <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-download mr-2"></i>Download Snapshot
+                        </button>
+                        <button class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-file-pdf mr-2"></i>Generate Report
+                        </button>
+                        <button class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-share mr-2"></i>Share
+                        </button>
+                    </div>
+                `;
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            updatePagination() {
+                const totalItems = this.filteredIncidents.length;
+                const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+                const endItem = Math.min(this.currentPage * this.itemsPerPage, totalItems);
+
+                document.getElementById('showingCount').textContent = `${startItem}-${endItem}`;
+                document.getElementById('totalCount').textContent = totalItems;
+
+                document.getElementById('prevBtn').disabled = this.currentPage === 1;
+                document.getElementById('nextBtn').disabled = this.currentPage >= Math.ceil(totalItems / this.itemsPerPage);
+            }
+
+            previousPage() {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.renderTable();
+                }
+            }
+
+            nextPage() {
+                const maxPages = Math.ceil(this.filteredIncidents.length / this.itemsPerPage);
+                if (this.currentPage < maxPages) {
+                    this.currentPage++;
+                    this.renderTable();
+                }
+            }
+
+            exportData() {
+                const csvContent = this.generateCSV();
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `incidents_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+
+            generateCSV() {
+                const headers = ['ID', 'DateTime', 'Location', 'Severity', 'People', 'Status', 'ResponseTime', 'Description'];
+                const rows = this.filteredIncidents.map(incident => [
+                    incident.id,
+                    incident.datetime,
+                    incident.location,
+                    incident.severity,
+                    incident.people,
+                    incident.status,
+                    incident.responseTime,
+                    incident.description
+                ]);
+                
+                return [headers, ...rows].map(row => row.join(',')).join('\n');
+            }
+        }
+
+        // Global functions
+        function viewIncident(id) {
+            window.incidentManager.viewIncidentDetails(id);
+        }
+
+        function downloadSnapshot(id) {
+            try {
+                // Show loading feedback
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+                button.disabled = true;
+                
+                // Create download link for incident snapshot - Fixed URL path
+                const downloadUrl = `/api/download-snapshot/${id}/`;
+                
+                // Create temporary anchor element for download
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `incident_${id}_snapshot.jpg`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                
+                // Add event listeners for success/error
+                link.addEventListener('click', () => {
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                        // Show success message
+                        showToast('Snapshot download started!', 'success');
+                    }, 1000);
+                });
+                
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log(`Downloading snapshot for incident ${id}`);
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Download failed. Please try again.', 'error');
+            }
+        }
+
+        function generateReport(id) {
+            try {
+                // Show loading feedback
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                button.disabled = true;
+                
+                // Create download link for incident report - Fixed URL path
+                const reportUrl = `/api/generate-report/${id}/`;
+                
+                // Create temporary anchor element for download
+                const link = document.createElement('a');
+                link.href = reportUrl;
+                link.download = `fire_incident_report_${id}.txt`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                
+                // Add event listeners for success/error
+                link.addEventListener('click', () => {
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                        // Show success message
+                        showToast('Report generated and download started!', 'success');
+                    }, 1000);
+                });
+                
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log(`Generating report for incident ${id}`);
+            } catch (error) {
+                console.error('Report generation error:', error);
+                showToast('Report generation failed. Please try again.', 'error');
+            }
+        }
+        
+        function showToast(message, type = 'info') {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' : 
+                type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+            }`;
+            toast.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                                   type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function closeIncidentModal() {
+            document.getElementById('incidentModal').classList.add('hidden');
+            document.getElementById('incidentModal').classList.remove('flex');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            window.incidentManager = new IncidentHistoryManager();
+        });
+    </script>
+</body>
+</html>

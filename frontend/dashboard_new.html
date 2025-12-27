@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Detection & Emergency Response - Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar-item {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            margin: 6px 0;
+        }
+        .sidebar-item:hover {
+            background: rgba(59, 130, 246, 0.15);
+            transform: translateX(6px);
+        }
+        .sidebar-item.active {
+            background: rgb(59, 130, 246);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .main-content {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        }
+        .fire-icon {
+            color: #ef4444;
+            filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6));
+            animation: flicker 2s infinite alternate;
+        }
+        @keyframes flicker {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        .connection-dot {
+            animation: pulse 2s infinite;
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+        }
+        .stat-card {
+            background: linear-gradient(145deg, rgba(31, 41, 55, 0.9), rgba(17, 24, 39, 0.9));
+            border: 1px solid rgba(75, 85, 99, 0.2);
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .emergency-glow {
+            animation: emergency-pulse 1s infinite;
+        }
+        @keyframes emergency-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen overflow-hidden">
+    <!-- Main Layout -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-80 bg-gradient-to-b from-gray-800 to-gray-900 shadow-2xl flex flex-col border-r border-gray-700">
+            <!-- Header -->
+            <div class="p-8 border-b border-gray-700">
+                <div class="flex items-center justify-center mb-6">
+                    <i class="fas fa-fire fire-icon text-5xl"></i>
+                </div>
+                <h1 class="text-xl font-bold text-center text-white mb-2">Fire Detection & Emergency Response</h1>
+                <h2 class="text-lg text-center text-gray-300 mb-6">Control Panel</h2>
+                <div class="flex items-center justify-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-green-500 rounded-full connection-dot"></div>
+                    <span class="text-sm text-green-400 font-medium">System Online</span>
+                </div>
+                <div class="flex items-center justify-center space-x-4">
+                    <div class="relative cursor-pointer hover:scale-110 transition-transform">
+                        <i class="fas fa-bell text-gray-400 text-xl hover:text-red-400 transition-colors"></i>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[24px] text-center font-bold">3</span>
+                    </div>
+                    <i class="fas fa-cog text-gray-400 text-xl cursor-pointer hover:text-blue-400 transition-colors hover:rotate-45 transition-transform duration-300"></i>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 p-6">
+                <div class="space-y-3">
+                    <a href="index.html" class="sidebar-item flex items-center space-x-4 px-6 py-4 text-gray-300 hover:text-white group">
+                        <i class="fas fa-home text-xl w-6 group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium text-lg">Home</span>
+                    </a>
+                    <a href="#" class="sidebar-item active flex items-center space-x-4 px-6 py-4 text-white">
+                        <i class="fas fa-tachometer-alt text-xl w-6"></i>
+                        <span class="font-medium text-lg">Dashboard</span>
+                    </a>
+                    <a href="camera-feeds.html" class="sidebar-item flex items-center space-x-4 px-6 py-4 text-gray-300 hover:text-white group">
+                        <i class="fas fa-video text-xl w-6 group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium text-lg">Camera Feeds</span>
+                    </a>
+                    <a href="incident-history.html" class="sidebar-item flex items-center space-x-4 px-6 py-4 text-gray-300 hover:text-white group">
+                        <i class="fas fa-history text-xl w-6 group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium text-lg">Incident History</span>
+                    </a>
+                    <a href="analytics.html" class="sidebar-item flex items-center space-x-4 px-6 py-4 text-gray-300 hover:text-white group">
+                        <i class="fas fa-chart-line text-xl w-6 group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium text-lg">Analytics</span>
+                    </a>
+                    <a href="emergency-contacts.html" class="sidebar-item flex items-center space-x-4 px-6 py-4 text-gray-300 hover:text-white group">
+                        <i class="fas fa-users text-xl w-6 group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium text-lg">Emergency Contacts</span>
+                    </a>
+                    <a href="reports.html" class="sidebar-item flex items-center space-x-4 px-6 py-4 text-gray-300 hover:text-white group">
+                        <i class="fas fa-file-alt text-xl w-6 group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium text-lg">Reports</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 main-content overflow-y-auto">
+            <!-- Top Stats -->
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card p-6 rounded-2xl text-center">
+                        <div class="text-3xl font-bold text-blue-400 mb-2">12</div>
+                        <div class="text-sm text-gray-400 mb-1">Active Cameras</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>All Online
+                        </div>
+                    </div>
+                    <div class="stat-card p-6 rounded-2xl text-center">
+                        <div class="text-3xl font-bold text-red-400 mb-2">3</div>
+                        <div class="text-sm text-gray-400 mb-1">Fire Incidents Today</div>
+                        <div class="text-xs text-yellow-400">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>Monitoring
+                        </div>
+                    </div>
+                    <div class="stat-card p-6 rounded-2xl text-center">
+                        <div class="text-3xl font-bold text-green-400 mb-2">8</div>
+                        <div class="text-sm text-gray-400 mb-1">People Evacuated</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-check mr-1"></i>Safe
+                        </div>
+                    </div>
+                    <div class="stat-card p-6 rounded-2xl text-center">
+                        <div class="text-3xl font-bold text-purple-400 mb-2">45s</div>
+                        <div class="text-sm text-gray-400 mb-1">Avg Response Time</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-tachometer-alt mr-1"></i>Optimal
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Controls -->
+                <div class="glass-card p-6 rounded-2xl mb-8">
+                    <h3 class="text-xl font-semibold text-white mb-6 flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                        Emergency Response Controls
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button class="emergency-btn bg-red-600 hover:bg-red-700 px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 group">
+                            <i class="fas fa-siren text-2xl mb-2 group-hover:animate-pulse"></i>
+                            <div class="font-semibold">Trigger Emergency Alert</div>
+                            <div class="text-xs text-red-200 mt-1">Activate all protocols</div>
+                        </button>
+                        <button class="emergency-btn bg-orange-600 hover:bg-orange-700 px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 group">
+                            <i class="fas fa-phone text-2xl mb-2 group-hover:animate-pulse"></i>
+                            <div class="font-semibold">Contact Fire Department</div>
+                            <div class="text-xs text-orange-200 mt-1">Direct emergency call</div>
+                        </button>
+                        <button class="emergency-btn bg-yellow-600 hover:bg-yellow-700 px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 group">
+                            <i class="fas fa-bullhorn text-2xl mb-2 group-hover:animate-pulse"></i>
+                            <div class="font-semibold">Building Announcement</div>
+                            <div class="text-xs text-yellow-200 mt-1">PA system broadcast</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Camera Controls -->
+                <div class="glass-card p-6 rounded-2xl mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-white flex items-center">
+                            <i class="fas fa-video text-blue-500 mr-3"></i>
+                            Camera Feed Controls
+                        </h3>
+                        <div class="flex space-x-3">
+                            <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-all duration-300">
+                                <i class="fas fa-play mr-2"></i>Start All
+                            </button>
+                            <button class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-xl transition-all duration-300">
+                                <i class="fas fa-pause mr-2"></i>Pause All
+                            </button>
+                            <button class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-xl transition-all duration-300" onclick="window.integratedDashboard?.testBackendConnection()">
+                                <i class="fas fa-wifi mr-2"></i>Test Backend
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Camera Feed 1 -->
+                        <div class="camera-feed glass-card rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer emergency-glow" data-location="Block A - Lab 3" data-status="fire">
+                            <div class="relative">
+                                <div class="w-full h-48 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-fire text-red-500 text-4xl mb-2 fire-icon"></i>
+                                        <p class="text-red-500 font-bold">FIRE DETECTED</p>
+                                    </div>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+                                        ALERT
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-3 left-3">
+                                    <span class="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">
+                                        Block A - Lab 3
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-400">Confidence: 92%</span>
+                                    <span class="text-sm text-gray-400">People: 3</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Camera Feed 2 -->
+                        <div class="camera-feed glass-card rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer" data-location="Block B - Entrance" data-status="safe">
+                            <div class="relative">
+                                <div class="w-full h-48 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-shield-alt text-green-500 text-4xl mb-2"></i>
+                                        <p class="text-green-500 font-bold">SAFE</p>
+                                    </div>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                        SAFE
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-3 left-3">
+                                    <span class="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">
+                                        Block B - Entrance
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-400">Confidence: 15%</span>
+                                    <span class="text-sm text-gray-400">People: 0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Camera Feed 3 -->
+                        <div class="camera-feed glass-card rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer" data-location="Block C - Corridor" data-status="warning">
+                            <div class="relative">
+                                <div class="w-full h-48 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-2"></i>
+                                        <p class="text-yellow-500 font-bold">MONITORING</p>
+                                    </div>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
+                                        WATCH
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-3 left-3">
+                                    <span class="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">
+                                        Block C - Corridor
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-400">Confidence: 45%</span>
+                                    <span class="text-sm text-gray-400">People: 2</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- More camera feeds -->
+                        <div class="camera-feed glass-card rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer" data-location="Block A - Lab 1" data-status="safe">
+                            <div class="relative">
+                                <div class="w-full h-48 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-shield-alt text-green-500 text-4xl mb-2"></i>
+                                        <p class="text-green-500 font-bold">SAFE</p>
+                                    </div>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                        SAFE
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-3 left-3">
+                                    <span class="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">
+                                        Block A - Lab 1
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-400">Confidence: 8%</span>
+                                    <span class="text-sm text-gray-400">People: 5</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="camera-feed glass-card rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer" data-location="Block D - Cafeteria" data-status="safe">
+                            <div class="relative">
+                                <div class="w-full h-48 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-shield-alt text-green-500 text-4xl mb-2"></i>
+                                        <p class="text-green-500 font-bold">SAFE</p>
+                                    </div>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                        SAFE
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-3 left-3">
+                                    <span class="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">
+                                        Block D - Cafeteria
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-400">Confidence: 12%</span>
+                                    <span class="text-sm text-gray-400">People: 15</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="camera-feed glass-card rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer" data-location="Block E - Library" data-status="safe">
+                            <div class="relative">
+                                <div class="w-full h-48 bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-shield-alt text-green-500 text-4xl mb-2"></i>
+                                        <p class="text-green-500 font-bold">SAFE</p>
+                                    </div>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                        SAFE
+                                    </span>
+                                </div>
+                                <div class="absolute bottom-3 left-3">
+                                    <span class="bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs">
+                                        Block E - Library
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-400">Confidence: 5%</span>
+                                    <span class="text-sm text-gray-400">People: 8</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Modal -->
+    <div id="emergencyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-red-600 p-8 rounded-2xl text-center animate-pulse max-w-md mx-4">
+            <i class="fas fa-exclamation-triangle text-6xl text-white mb-4"></i>
+            <h2 class="text-2xl font-bold text-white mb-4">EMERGENCY PROTOCOL ACTIVATED</h2>
+            <div class="space-y-2 text-white mb-6">
+                <p>🚨 All sirens activated</p>
+                <p>📱 SMS alerts sent</p>
+                <p>📧 Email notifications sent</p>
+                <p>🔊 Building announcement active</p>
+            </div>
+            <button onclick="closeEmergencyModal()" class="bg-white text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors">
+                ACKNOWLEDGE
+            </button>
+        </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div id="connection-status" class="fixed top-4 right-4 z-50 bg-gray-800 px-4 py-2 rounded-lg shadow-lg">
+        <span class="flex items-center text-yellow-400">
+            <div class="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></div>
+            Connecting to Backend...
+        </span>
+    </div>
+
+    <script src="js/api-integration.js"></script>
+    <script src="js/integrated-dashboard.js"></script>
+</body>
+</html>

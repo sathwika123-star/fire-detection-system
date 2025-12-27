@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Feeds - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Sound Enable Banner -->
+    <div id="soundEnableBanner" class="fixed top-0 left-0 right-0 bg-yellow-500 text-black p-3 text-center z-50 cursor-pointer hover:bg-yellow-400" onclick="enableAlertSound()">
+        <i class="fas fa-volume-up mr-2"></i>
+        <span class="font-bold">🔊 Click here to enable fire alert sounds</span>
+        <i class="fas fa-times ml-4 hover:text-red-600" onclick="event.stopPropagation(); document.getElementById('soundEnableBanner').classList.add('hidden');"></i>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700 mt-12" id="mainHeader">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Camera Feeds Management</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <!-- Sound Toggle Button -->
+            <button id="soundToggleBtn" onclick="toggleSound()" class="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded-lg text-sm">
+                <i class="fas fa-volume-mute" id="soundIcon"></i>
+                <span id="soundStatusText">Sound OFF</span>
+            </button>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-gray-400">{{ total_cameras }} Camera{{ total_cameras|pluralize }} Online</span>
+            </div>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-bell text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'index' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-video"></i>
+                            <span>Live Monitoring</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'camera-feeds' %}" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'incident-history' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'analytics' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'emergency-contacts' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'reports' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <div class="mb-6">
+                <h2 class="text-2xl font-semibold mb-4">Camera Feeds Management</h2>
+                <div class="flex space-x-4 mb-6">
+                    <button id="startAllBtn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-play mr-2"></i>Start All Cameras
+                    </button>
+                    <button id="stopAllBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-stop mr-2"></i>Stop All Cameras
+                    </button>
+                    <button id="refreshBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh Feeds
+                    </button>
+                    <button id="addCameraBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-plus mr-2"></i>Add Camera
+                    </button>
+                </div>
+            </div>
+
+            <!-- Camera Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="cameraGrid">
+                {% for video in videos %}
+                <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700">
+                    <div class="relative">
+                        <div class="w-full h-48 bg-gray-700 flex items-center justify-center">
+                            <video controls class="w-full h-full object-cover">
+                                <source src="{{ video.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        <div class="absolute top-2 right-2">
+                            {% if video.status == 'fire' %}
+                            <span class="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                                🔥 FIRE DETECTED
+                            </span>
+                            {% else %}
+                            <span class="bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">
+                                ✅ SAFE
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="absolute bottom-2 left-2">
+                            <span class="bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                                {{ video.name|upper }} • Live
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-2">{{ video.display_name }}</h3>
+                        <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Status:</span>
+                                {% if video.status == 'fire' %}
+                                <span class="text-red-400 font-semibold">ALERT</span>
+                                {% else %}
+                                <span class="text-green-400 font-semibold">NORMAL</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Confidence:</span>
+                                <span class="text-white">{{ video.confidence }}%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">People:</span>
+                                <span class="text-white">{{ video.people_count }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Recording:</span>
+                                <span class="text-green-400">●</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-xs">
+                                View Details
+                            </button>
+                            <button class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-1 px-3 rounded text-xs">
+                                Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-video-slash text-4xl text-gray-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-400 mb-2">No Videos Available</h3>
+                    <p class="text-gray-500">Upload videos to the media/uploaded_videos directory to see camera feeds.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CameraFeedsManager {
+            constructor() {
+                this.cameras = [
+                    { 
+                        id: 1, 
+                        name: "MALL_INSIDE", 
+                        location: "Mall Interior",
+                        status: "safe", 
+                        recording: true, 
+                        resolution: "1080p",
+                        video: "mall_inside.mp4",
+                        confidence: 6,
+                        people: 3,
+                        lastAnalysis: new Date(),
+                        fireScenario: "kitchen_fire",
+                        detectionStage: "safe"
+                    },
+                    { 
+                        id: 2, 
+                        name: "MART_001", 
+                        location: "Mart Security",
+                        status: "safe", 
+                        recording: true, 
+                        resolution: "1080p",
+                        video: "mart.mp4",
+                        confidence: 2,
+                        people: 2,
+                        lastAnalysis: new Date(),
+                        fireScenario: "electrical_fire",
+                        detectionStage: "safe"
+                    },
+                    { 
+                        id: 3, 
+                        name: "Mall Escalator", 
+                        location: "Escalator Area",
+                        status: "safe", 
+                        recording: true, 
+                        resolution: "720p",
+                        video: "mall escalator.mp4",
+                        confidence: 1,
+                        people: 8,
+                        lastAnalysis: new Date(),
+                        fireScenario: "monitoring",
+                        detectionStage: "safe"
+                    },
+                    { 
+                        id: 4, 
+                        name: "Mall First Floor", 
+                        location: "First Floor",
+                        status: "safe", 
+                        recording: true, 
+                        resolution: "1080p",
+                        video: "mall first floor.mp4",
+                        confidence: 2,
+                        people: 5,
+                        lastAnalysis: new Date(),
+                        fireScenario: "monitoring",
+                        detectionStage: "safe"
+                    },
+                    { 
+                        id: 5, 
+                        name: "Mall Front", 
+                        location: "Main Entrance",
+                        status: "safe", 
+                        recording: true, 
+                        resolution: "720p",
+                        video: "mall front.mp4",
+                        confidence: 1,
+                        people: 12,
+                        lastAnalysis: new Date(),
+                        fireScenario: "monitoring",
+                        detectionStage: "safe"
+                    },
+                    { 
+                        id: 6, 
+                        name: "Mall Total View", 
+                        location: "Overview Camera",
+                        status: "safe", 
+                        recording: true, 
+                        resolution: "1080p",
+                        video: "mall total.mp4",
+                        confidence: 0,
+                        people: 15,
+                        lastAnalysis: new Date(),
+                        fireScenario: "monitoring",
+                        detectionStage: "safe"
+                    }
+                ];
+                this.isConnectedToBackend = false;
+                this.init();
+            }
+
+            async init() {
+                console.log('🔥 Initializing Enhanced Camera Feeds Manager...');
+                this.renderCameras();
+                this.bindEvents();
+                
+                // Connect to progressive fire detection backend
+                await this.connectToProgressiveDetection();
+                
+                // Start real-time fire detection updates
+                this.startFireDetectionUpdates();
+                
+                console.log('✅ Enhanced Camera Feeds Manager ready!');
+            }
+
+            async connectToProgressiveDetection() {
+                try {
+                    const response = await fetch('/api/confidence-live/');
+                    if (response.ok) {
+                        this.isConnectedToBackend = true;
+                        console.log('✅ Connected to Progressive Fire Detection Backend');
+                        this.showNotification('Connected to Fire Detection System', 'success');
+                    } else {
+                        throw new Error('Backend not responding');
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Backend connection failed, using simulation mode');
+                    this.isConnectedToBackend = false;
+                    this.showNotification('Using Simulation Mode - Backend Unavailable', 'warning');
+                }
+            }
+
+            startFireDetectionUpdates() {
+                console.log('🔄 Starting real-time fire detection updates...');
+                
+                // Update fire detection status every 3 seconds
+                setInterval(async () => {
+                    if (this.isConnectedToBackend) {
+                        await this.fetchLiveFireDetection();
+                    } else {
+                        this.simulateFireDetection();
+                    }
+                }, 3000);
+            }
+
+            async fetchLiveFireDetection() {
+                try {
+                    const response = await fetch('/api/confidence-live/');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.updateCameraWithFireDetection(data);
+                    } else {
+                        // Fallback to simulation if API fails
+                        this.simulateFireDetection();
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch live fire detection:', error);
+                    this.simulateFireDetection();
+                }
+            }
+
+            simulateFireDetection() {
+                const currentTime = Date.now();
+                
+                this.cameras.forEach(camera => {
+                    if (camera.fireScenario === 'kitchen_fire' || camera.fireScenario === 'electrical_fire') {
+                        let confidence, stage;
+                        
+                        if (camera.fireScenario === 'kitchen_fire') {
+                            // Kitchen fire scenario - 15-minute cycle
+                            const elapsed = (currentTime % 900000) / 1000;
+                            if (elapsed < 120) {
+                                confidence = 3 + Math.random() * 10;
+                                stage = 'safe';
+                            } else if (elapsed < 180) {
+                                confidence = 20 + Math.random() * 20;
+                                stage = 'smoke_detected';
+                            } else if (elapsed < 240) {
+                                confidence = 45 + Math.random() * 20;
+                                stage = 'fire_development';
+                            } else {
+                                confidence = 70 + Math.random() * 25;
+                                stage = 'fire_emergency';
+                            }
+                        } else {
+                            // Electrical fire scenario - 21-minute cycle
+                            const elapsed = (currentTime % 1260000) / 1000;
+                            if (elapsed < 180) {
+                                confidence = 1 + Math.random() * 8;
+                                stage = 'safe';
+                            } else if (elapsed < 300) {
+                                confidence = 15 + Math.random() * 20;
+                                stage = 'smoke_detected';
+                            } else if (elapsed < 360) {
+                                confidence = 40 + Math.random() * 25;
+                                stage = 'fire_development';
+                            } else {
+                                confidence = 70 + Math.random() * 20;
+                                stage = 'fire_emergency';
+                            }
+                        }
+
+                        // Update camera status based on detection stage
+                        this.updateCameraStatus(camera, confidence, stage);
+                    }
+                });
+                
+                this.renderCameras();
+            }
+
+            updateCameraWithFireDetection(data) {
+                // Find cameras that match the video being analyzed
+                const matchingCameras = this.cameras.filter(camera => 
+                    data.video_name && (
+                        camera.video === data.video_name ||
+                        camera.name.toLowerCase().includes(data.video_name.toLowerCase().split('_')[0])
+                    )
+                );
+
+                if (matchingCameras.length === 0) {
+                    // Update first camera if no specific match
+                    matchingCameras.push(this.cameras[0]);
+                }
+
+                matchingCameras.forEach(camera => {
+                    this.updateCameraStatus(camera, data.confidence, data.detection_stage);
+                });
+
+                this.renderCameras();
+            }
+
+            updateCameraStatus(camera, confidence, detectionStage) {
+                const previousStage = camera.detectionStage;
+                
+                camera.confidence = Math.round(confidence * 10) / 10;
+                camera.detectionStage = detectionStage;
+                camera.lastAnalysis = new Date();
+
+                // Update camera status based on detection stage
+                switch(detectionStage) {
+                    case 'safe':
+                        camera.status = 'safe';
+                        break;
+                    case 'smoke_detected':
+                        camera.status = 'smoke_alert';
+                        break;
+                    case 'fire_development':
+                        camera.status = 'fire_development';
+                        break;
+                    case 'fire_emergency':
+                        camera.status = 'fire_accident';
+                        break;
+                }
+
+                // Trigger alerts if status changed to emergency
+                if (previousStage !== detectionStage) {
+                    this.handleStatusChange(camera, previousStage, detectionStage);
+                }
+            }
+
+            handleStatusChange(camera, previousStage, newStage) {
+                const stageMessages = {
+                    'safe': 'All Clear',
+                    'smoke_detected': 'Smoke Alert',
+                    'fire_development': 'Fire Development',
+                    'fire_emergency': 'FIRE EMERGENCY'
+                };
+
+                const currentMessage = stageMessages[newStage] || newStage;
+                
+                if (newStage === 'smoke_detected') {
+                    this.showNotification(`💨 SMOKE DETECTED in ${camera.name} (${camera.confidence}%)`, 'warning');
+                    console.log(`💨 SMOKE ALERT: ${camera.name} - ${camera.confidence}% confidence`);
+                    // Play alert sound for smoke detection
+                    if (typeof playAlertBeep === 'function') playAlertBeep();
+                } else if (newStage === 'fire_emergency') {
+                    this.showNotification(`🔥 FIRE EMERGENCY in ${camera.name} (${camera.confidence}%)`, 'error');
+                    console.log(`🔥 FIRE EMERGENCY: ${camera.name} - ${camera.confidence}% confidence`);
+                    
+                    // Start continuous alert beeping for fire emergency
+                    if (typeof playFireAlertSound === 'function') playFireAlertSound();
+                    
+                    // Trigger emergency overlay
+                    this.showEmergencyModal(camera);
+                } else if (newStage === 'safe' && previousStage !== 'safe') {
+                    this.showNotification(`✅ ${camera.name} is now SAFE`, 'success');
+                    // Stop alert sound when safe
+                    if (typeof stopFireAlertSound === 'function') stopFireAlertSound();
+                }
+            }
+
+            showEmergencyModal(camera) {
+                // Start alert sound when modal shows
+                if (typeof playFireAlertSound === 'function') playFireAlertSound();
+                
+                // 🚨 SEND AUTOMATIC EMAIL AND SMS ALERTS
+                this.sendEmergencyAlerts(camera);
+                
+                const modal = document.createElement('div');
+                modal.id = 'fireEmergencyModal';
+                modal.className = 'fixed inset-0 bg-red-900 bg-opacity-90 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-red-800 p-8 rounded-lg text-center max-w-md animate-pulse border-4 border-red-500">
+                        <div class="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold mb-4 ${typeof soundEnabled !== 'undefined' && soundEnabled ? '' : 'hidden'}" id="modalSoundIndicator">
+                            🔊 ALARM SOUND PLAYING
+                        </div>
+                        <i class="fas fa-fire text-6xl text-red-300 mb-4"></i>
+                        <h2 class="text-3xl font-bold text-white mb-4">🔥 FIRE ACCIDENT DETECTED 🔥</h2>
+                        <div class="text-red-200 mb-6">
+                            <p class="text-xl font-bold">${camera.name}</p>
+                            <p>Location: ${camera.location}</p>
+                            <p>Confidence: ${camera.confidence}%</p>
+                            <p>People in Area: ${camera.people}</p>
+                        </div>
+                        <div class="space-y-2 text-left text-red-200 mb-6" id="emergencyStatus">
+                            <p id="emailStatus">📧 Sending email alerts...</p>
+                            <p id="whatsappStatus">💬 Sending WhatsApp alerts...</p>
+                            <p>✅ Evacuation procedures activated</p>
+                            <p>✅ Camera status updated to FIRE ACCIDENT</p>
+                        </div>
+                        <button onclick="acknowledgeFireEmergency()" 
+                                class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-bold text-white">
+                            ACKNOWLEDGE FIRE ACCIDENT
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                // Auto-remove after 30 seconds if not acknowledged
+                setTimeout(() => {
+                    if (modal.parentElement) {
+                        acknowledgeFireEmergency();
+                    }
+                }, 30000);
+            }
+
+            async sendEmergencyAlerts(camera) {
+                console.log('🚨 SENDING EMERGENCY ALERTS FOR FIRE DETECTION');
+                console.log('📍 Location:', camera.location);
+                console.log('📹 Camera:', camera.name);
+                console.log('📊 Confidence:', camera.confidence + '%');
+                
+                // Update status in modal
+                const updateStatus = (id, message, success) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = success ? `✅ ${message}` : `❌ ${message}`;
+                    }
+                };
+                
+                // 1. SEND EMAIL ALERTS
+                try {
+                    const emailResponse = await fetch('/api/send-emergency-alert/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            location: camera.location,
+                            camera: camera.name,
+                            confidence: camera.confidence / 100,
+                            time: new Date().toLocaleString()
+                        })
+                    });
+                    
+                    const emailResult = await emailResponse.json();
+                    
+                    if (emailResult.success) {
+                        console.log('✅ EMAIL ALERTS SENT to', emailResult.sent_count, 'contacts');
+                        updateStatus('emailStatus', `Email sent to ${emailResult.sent_count} contacts`, true);
+                    } else {
+                        console.error('❌ Email alert failed:', emailResult.error);
+                        updateStatus('emailStatus', 'Email alert failed', false);
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to send email alerts:', error);
+                    updateStatus('emailStatus', 'Email alert error', false);
+                }
+                
+                // 2. SEND WHATSAPP ALERTS
+                try {
+                    const whatsappResponse = await fetch('/api/send-emergency-whatsapp-alert/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            location: camera.location,
+                            confidence: camera.confidence / 100,
+                            camera: camera.name,
+                            people_count: camera.people,
+                            time: new Date().toLocaleString(),
+                            additional_info: `People detected: ${camera.people}`
+                        })
+                    });
+                    
+                    const whatsappResult = await whatsappResponse.json();
+                    
+                    if (whatsappResult.success) {
+                        console.log('✅ WHATSAPP ALERTS SENT to', whatsappResult.sent_count, 'contacts');
+                        updateStatus('whatsappStatus', `WhatsApp sent to ${whatsappResult.sent_count} contacts`, true);
+                    } else {
+                        // WhatsApp not configured is expected
+                        if (whatsappResult.error && whatsappResult.error.toLowerCase().includes('not configured')) {
+                            console.warn('⚠️ WhatsApp not configured (Twilio credentials needed)');
+                            updateStatus('whatsappStatus', 'WhatsApp not configured (Twilio needed)', false);
+                        } else {
+                            console.error('❌ WhatsApp alert failed:', whatsappResult.error);
+                            updateStatus('whatsappStatus', 'WhatsApp alert failed', false);
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to send WhatsApp alerts:', error);
+                    updateStatus('whatsappStatus', 'WhatsApp alert error', false);
+                }
+                
+                console.log('🚨 EMERGENCY ALERT PROCESS COMPLETED');
+            }
+
+            renderCameras() {
+                const grid = document.getElementById('cameraGrid');
+                grid.innerHTML = '';
+
+                this.cameras.forEach(camera => {
+                    const cameraCard = this.createCameraCard(camera);
+                    grid.appendChild(cameraCard);
+                });
+            }
+
+            createCameraCard(camera) {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden border border-gray-700';
+                
+                // Dynamic status styling based on detection stage
+                const statusStyles = {
+                    'safe': { color: 'bg-green-500', icon: 'fas fa-shield-alt', text: 'SAFE', pulse: false },
+                    'smoke_alert': { color: 'bg-yellow-500', icon: 'fas fa-cloud', text: 'SMOKE ALERT', pulse: true },
+                    'fire_development': { color: 'bg-orange-500', icon: 'fas fa-exclamation-triangle', text: 'FIRE DEVELOPING', pulse: true },
+                    'fire_accident': { color: 'bg-red-500', icon: 'fas fa-fire', text: 'FIRE ACCIDENT', pulse: true }
+                };
+
+                const statusStyle = statusStyles[camera.status] || statusStyles['safe'];
+                const pulseClass = statusStyle.pulse ? 'animate-pulse' : '';
+
+                card.innerHTML = `
+                    <div class="relative">
+                        <div class="w-full h-48 bg-gray-700 flex items-center justify-center">
+                            ${camera.video ? 
+                                `<video controls class="w-full h-full object-cover" style="max-height: 192px;">
+                                    <source src="/media/uploaded_videos/${camera.video}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>` :
+                                `<i class="fas fa-video text-blue-500 text-4xl"></i>`
+                            }
+                        </div>
+                        <div class="absolute top-2 right-2 flex space-x-2">
+                            <span class="${statusStyle.color} ${pulseClass} text-white px-2 py-1 rounded text-xs font-bold">
+                                <i class="${statusStyle.icon} mr-1"></i>${statusStyle.text}
+                            </span>
+                            ${camera.recording ? 
+                                '<span class="bg-red-600 text-white px-2 py-1 rounded text-xs"><i class="fas fa-record-vinyl mr-1"></i>REC</span>' : 
+                                ''
+                            }
+                        </div>
+                        <div class="absolute bottom-2 left-2">
+                            <span class="bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                                ${camera.name} • ${camera.location}
+                            </span>
+                        </div>
+                        ${camera.status === 'fire_accident' ? 
+                            `<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                <div class="bg-red-600 text-white px-4 py-2 rounded-lg text-center animate-pulse">
+                                    <i class="fas fa-fire text-2xl"></i>
+                                    <div class="text-sm font-bold">FIRE ACCIDENT</div>
+                                    <div class="text-xs">${camera.confidence}% Confidence</div>
+                                </div>
+                            </div>` : 
+                            camera.status === 'smoke_alert' ?
+                            `<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                <div class="bg-yellow-600 text-white px-4 py-2 rounded-lg text-center animate-pulse">
+                                    <i class="fas fa-cloud text-2xl"></i>
+                                    <div class="text-sm font-bold">SMOKE ALERT</div>
+                                    <div class="text-xs">${camera.confidence}% Confidence</div>
+                                </div>
+                            </div>` : ''
+                        }
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-semibold text-sm">${camera.name}</h3>
+                            <span class="text-xs text-gray-400">${camera.resolution}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+                            <div class="text-${camera.status === 'fire_accident' ? 'red' : camera.status === 'smoke_alert' ? 'yellow' : 'green'}-400">
+                                Confidence: ${camera.confidence}%
+                            </div>
+                            <div class="text-gray-400">People: ${camera.people}</div>
+                            <div class="text-gray-400">Stage: ${camera.detectionStage.replace('_', ' ')}</div>
+                            <div class="text-gray-400">Updated: ${camera.lastAnalysis.toLocaleTimeString()}</div>
+                        </div>
+                        
+                        <!-- Confidence Progress Bar -->
+                        <div class="mb-3">
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="h-2 rounded-full transition-all duration-300 ${
+                                    camera.confidence < 20 ? 'bg-green-500' :
+                                    camera.confidence < 70 ? 'bg-yellow-500' : 'bg-red-500'
+                                }" style="width: ${Math.min(camera.confidence, 100)}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-1">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs" onclick="viewCamera(${camera.id})">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button class="flex-1 bg-${camera.status === 'fire_accident' ? 'red' : camera.status === 'smoke_alert' ? 'yellow' : 'green'}-600 hover:bg-${camera.status === 'fire_accident' ? 'red' : camera.status === 'smoke_alert' ? 'yellow' : 'green'}-700 px-2 py-1 rounded text-xs" onclick="analyzeCamera(${camera.id})">
+                                <i class="fas fa-${camera.status === 'fire_accident' ? 'fire' : camera.status === 'smoke_alert' ? 'cloud' : 'search'} mr-1"></i>${statusStyle.text}
+                            </button>
+                            <button class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs" onclick="configureCamera(${camera.id})">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                return card;
+            }
+
+            bindEvents() {
+                document.getElementById('startAllBtn').addEventListener('click', () => this.startAllCameras());
+                document.getElementById('stopAllBtn').addEventListener('click', () => this.stopAllCameras());
+                document.getElementById('refreshBtn').addEventListener('click', () => this.refreshFeeds());
+                document.getElementById('addCameraBtn').addEventListener('click', () => this.addCamera());
+            }
+
+            startAllCameras() {
+                this.cameras.forEach(camera => {
+                    if (camera.status !== 'maintenance') {
+                        camera.recording = true;
+                    }
+                });
+                this.renderCameras();
+                this.showNotification('All cameras started - Fire detection active', 'success');
+            }
+
+            stopAllCameras() {
+                this.cameras.forEach(camera => {
+                    camera.recording = false;
+                });
+                this.renderCameras();
+                this.showNotification('All cameras stopped - Fire detection paused', 'warning');
+            }
+
+            refreshFeeds() {
+                this.showNotification('Refreshing camera feeds and fire detection...', 'info');
+                setTimeout(async () => {
+                    await this.connectToProgressiveDetection();
+                    this.renderCameras();
+                    this.showNotification('Camera feeds and fire detection refreshed', 'success');
+                }, 2000);
+            }
+
+            addCamera() {
+                const newId = Math.max(...this.cameras.map(c => c.id)) + 1;
+                const newCamera = {
+                    id: newId,
+                    name: `Camera ${newId}`,
+                    location: `Location ${newId}`,
+                    status: 'safe',
+                    recording: false,
+                    resolution: '1080p',
+                    confidence: 0,
+                    people: 0,
+                    lastAnalysis: new Date(),
+                    fireScenario: 'monitoring',
+                    detectionStage: 'safe'
+                };
+                this.cameras.push(newCamera);
+                this.renderCameras();
+                this.showNotification('New camera added with fire detection enabled', 'success');
+            }
+
+            showNotification(message, type) {
+                const notification = document.createElement('div');
+                const colors = {
+                    success: 'bg-green-600',
+                    warning: 'bg-yellow-600',
+                    error: 'bg-red-600',
+                    info: 'bg-blue-600'
+                };
+                
+                notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <span>${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+        }
+
+        // Global functions for camera actions
+        function viewCamera(id) {
+            const camera = window.cameraManager.cameras.find(c => c.id === id);
+            if (camera && camera.video) {
+                // Show full screen video with fire detection overlay
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="relative max-w-4xl max-h-full">
+                        <video controls autoplay class="max-w-full max-h-full">
+                            <source src="/media/uploaded_videos/${camera.video}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                class="absolute top-4 right-4 text-white bg-red-600 rounded-full w-8 h-8 flex items-center justify-center">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white p-3 rounded">
+                            <h3 class="font-bold">${camera.name}</h3>
+                            <p class="text-sm">Location: ${camera.location}</p>
+                            <p class="text-sm">Status: <span class="${camera.status === 'fire_accident' ? 'text-red-400' : camera.status === 'smoke_alert' ? 'text-yellow-400' : 'text-green-400'}">${camera.status.toUpperCase().replace('_', ' ')}</span></p>
+                            <p class="text-sm">Fire Confidence: ${camera.confidence}%</p>
+                            <p class="text-sm">Detection Stage: ${camera.detectionStage.replace('_', ' ')}</p>
+                            <p class="text-sm">Last Update: ${camera.lastAnalysis.toLocaleTimeString()}</p>
+                        </div>
+                        ${camera.status === 'fire_accident' ? 
+                            `<div class="absolute top-4 left-4 bg-red-600 text-white p-3 rounded animate-pulse">
+                                <i class="fas fa-fire mr-2"></i>FIRE ACCIDENT DETECTED
+                            </div>` : 
+                            camera.status === 'smoke_alert' ?
+                            `<div class="absolute top-4 left-4 bg-yellow-600 text-white p-3 rounded animate-pulse">
+                                <i class="fas fa-cloud mr-2"></i>SMOKE ALERT ACTIVE
+                            </div>` : ''
+                        }
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } else {
+                window.open(`camera-view.html?id=${id}`, '_blank');
+            }
+        }
+
+        function analyzeCamera(id) {
+            const camera = window.cameraManager.cameras.find(c => c.id === id);
+            if (camera) {
+                let alertMessage = '';
+                
+                switch(camera.status) {
+                    case 'fire_accident':
+                        alertMessage = `🔥 FIRE ACCIDENT - ${camera.name}\n\nLocation: ${camera.location}\nConfidence: ${camera.confidence}%\nPeople in Area: ${camera.people}\n\n⚠️ IMMEDIATE EVACUATION REQUIRED!\n✅ Emergency services notified\n✅ Emergency response active`;
+                        break;
+                    case 'smoke_alert':
+                        alertMessage = `💨 SMOKE ALERT - ${camera.name}\n\nLocation: ${camera.location}\nConfidence: ${camera.confidence}%\nPeople in Area: ${camera.people}\n\n⚠️ INVESTIGATION REQUIRED\n✅ Internal staff notified\n⏳ Monitoring for fire development`;
+                        break;
+                    case 'fire_development':
+                        alertMessage = `🔥 FIRE DEVELOPING - ${camera.name}\n\nLocation: ${camera.location}\nConfidence: ${camera.confidence}%\nPeople in Area: ${camera.people}\n\n⚠️ PREPARE EMERGENCY RESPONSE\n⏳ Fire is developing - escalation likely`;
+                        break;
+                    default:
+                        alertMessage = `✅ SAFE - ${camera.name}\n\nLocation: ${camera.location}\nConfidence: ${camera.confidence}%\nPeople in Area: ${camera.people}\n\n🟢 No threats detected\n📊 Area is safe - continue monitoring`;
+                        break;
+                }
+                
+                alert(alertMessage);
+            }
+        }
+
+        function configureCamera(id) {
+            const camera = window.cameraManager.cameras.find(c => c.id === id);
+            if (camera) {
+                const configMessage = `Configure ${camera.name}\n\nCurrent Settings:\n- Resolution: ${camera.resolution}\n- Recording: ${camera.recording ? 'ON' : 'OFF'}\n- Fire Detection: ${camera.status === 'fire_accident' ? 'FIRE ACCIDENT ACTIVE' : camera.status === 'smoke_alert' ? 'SMOKE ALERT ACTIVE' : 'MONITORING'}\n- Detection Stage: ${camera.detectionStage.replace('_', ' ')}\n- Fire Scenario: ${camera.fireScenario.replace('_', ' ')}\n- Last Analysis: ${camera.lastAnalysis.toLocaleString()}`;
+                alert(configMessage);
+            }
+        }
+
+        // Acknowledge fire emergency and stop sound
+        function acknowledgeFireEmergency() {
+            const modal = document.getElementById('fireEmergencyModal');
+            if (modal) {
+                modal.remove();
+            }
+            // Stop the alert sound
+            if (typeof stopFireAlertSound === 'function') {
+                stopFireAlertSound();
+            }
+            console.log('✅ Fire emergency acknowledged - sound stopped');
+        }
+
+        function toggleRecording(id) {
+            const camera = window.cameraManager.cameras.find(c => c.id === id);
+            if (camera) {
+                camera.recording = !camera.recording;
+                window.cameraManager.renderCameras();
+                window.cameraManager.showNotification(
+                    `Camera ${id} recording ${camera.recording ? 'started' : 'stopped'} - Fire detection ${camera.recording ? 'active' : 'paused'}`,
+                    camera.recording ? 'success' : 'warning'
+                );
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.cameraManager = new CameraFeedsManager();
+        });
+    </script>
+
+    <!-- Real AI Detection Integration -->
+    <script src="/static/js/real-ai-integration.js"></script>
+    <script>
+        // Initialize camera feeds with real AI detection
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎥 Initializing Camera Feeds with Real AI Detection...');
+            
+            // Override existing detection system if AI is available
+            if (window.realAIFireDetection && window.realAIFireDetection.isAIActive()) {
+                console.log('🤖 Real AI Detection active for camera feeds');
+                
+                // The real AI detection will automatically handle the video analysis
+                // and update the UI elements accordingly
+            } else {
+                console.log('⚠️ Using fallback detection for camera feeds');
+            }
+        });
+    </script>
+
+    <!-- Alert Sound System -->
+    <script>
+        // Sound System Variables
+        let audioContext = null;
+        let soundEnabled = false;
+        let alertInterval = null;
+
+        // Initialize Audio Context
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            return audioContext;
+        }
+
+        // Enable sound when user clicks banner
+        function enableAlertSound() {
+            soundEnabled = true;
+            initAudioContext();
+            
+            // Hide banner
+            document.getElementById('soundEnableBanner').classList.add('hidden');
+            document.getElementById('mainHeader').classList.remove('mt-12');
+            
+            // Update toggle button
+            updateSoundButton(true);
+            
+            // Play test beep
+            playAlertBeep();
+            
+            console.log('🔊 Alert sound enabled');
+        }
+
+        // Toggle sound on/off
+        function toggleSound() {
+            if (!soundEnabled) {
+                enableAlertSound();
+                return;
+            }
+            soundEnabled = !soundEnabled;
+            updateSoundButton(soundEnabled);
+            
+            if (soundEnabled) {
+                playAlertBeep();
+            } else {
+                stopAlertBeeping();
+            }
+        }
+
+        // Update sound button appearance
+        function updateSoundButton(isOn) {
+            const btn = document.getElementById('soundToggleBtn');
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundStatusText');
+            
+            if (isOn) {
+                btn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                btn.classList.add('bg-green-600', 'hover:bg-green-700');
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-volume-up');
+                text.textContent = 'Sound ON';
+            } else {
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-mute');
+                text.textContent = 'Sound OFF';
+            }
+        }
+
+        // Play a single beep
+        function playBeep(frequency = 800, duration = 200, volume = 0.5) {
+            if (!soundEnabled) return;
+            
+            try {
+                const ctx = initAudioContext();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.type = 'square';
+                oscillator.frequency.value = frequency;
+                gainNode.gain.value = volume;
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + duration / 1000);
+            } catch(e) {
+                console.error('Beep error:', e);
+            }
+        }
+
+        // Play alert beep pattern (high-low alternating)
+        function playAlertBeep() {
+            if (!soundEnabled) return;
+            
+            playBeep(880, 150, 0.5);
+            setTimeout(() => playBeep(440, 150, 0.5), 200);
+            setTimeout(() => playBeep(880, 150, 0.5), 400);
+            setTimeout(() => playBeep(440, 150, 0.5), 600);
+        }
+
+        // Start continuous alert beeping
+        function startAlertBeeping() {
+            if (!soundEnabled) return;
+            
+            // Play immediately
+            playAlertBeep();
+            
+            // Continue beeping every 2 seconds
+            alertInterval = setInterval(() => {
+                playAlertBeep();
+            }, 2000);
+        }
+
+        // Stop alert beeping
+        function stopAlertBeeping() {
+            if (alertInterval) {
+                clearInterval(alertInterval);
+                alertInterval = null;
+            }
+        }
+
+        // Fire Alert Sound - called when fire is detected
+        function playFireAlertSound() {
+            if (!soundEnabled) {
+                console.log('⚠️ Sound not enabled - click banner to enable');
+                return;
+            }
+            
+            console.log('🔊 Playing fire alert sound');
+            startAlertBeeping();
+        }
+
+        // Stop fire alert sound
+        function stopFireAlertSound() {
+            stopAlertBeeping();
+        }
+    </script>
+</body>
+</html>

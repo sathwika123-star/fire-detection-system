@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progressive Fire Detection - Safe to Fire Accident Transition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Progressive Fire Detection - Safe ↔ Fire Accident Transition</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-gray-400">System Online</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-gray-400">Auto Detection Active</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-6">
+        <!-- Introduction -->
+        <div class="bg-gradient-to-r from-blue-900 to-purple-900 p-6 rounded-lg mb-6 border border-blue-700">
+            <h2 class="text-2xl font-semibold text-white mb-4 flex items-center">
+                <i class="fas fa-magic text-yellow-500 mr-3"></i>
+                Automatic Safe ↔ Fire Accident Button Transition
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-black bg-opacity-30 p-4 rounded">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-shield-alt text-green-500 mr-2"></i>
+                        <span class="font-semibold">SAFE Button (0-19%)</span>
+                    </div>
+                    <p class="text-gray-300">Initially, videos show "SAFE - No Action Required" when fire confidence is low</p>
+                </div>
+                <div class="bg-black bg-opacity-30 p-4 rounded">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-arrow-right text-yellow-500 mr-2"></i>
+                        <span class="font-semibold">Automatic Transition</span>
+                    </div>
+                    <p class="text-gray-300">As fire develops, buttons automatically change: Safe → Smoke Alert → Fire Development → Fire Accident</p>
+                </div>
+                <div class="bg-black bg-opacity-30 p-4 rounded">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-fire text-red-500 mr-2"></i>
+                        <span class="font-semibold">FIRE ACCIDENT (70%+)</span>
+                    </div>
+                    <p class="text-gray-300">When fire is detected, button automatically becomes "FIRE ACCIDENT - Emergency Response Active"</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progressive Status Interface will be injected here by JavaScript -->
+        
+    </main>
+
+    <!-- Emergency Status Overlay -->
+    <div id="emergency-overlay" class="fixed inset-0 bg-red-900 bg-opacity-90 hidden items-center justify-center z-50">
+        <div class="bg-red-800 p-8 rounded-lg text-center max-w-md animate-pulse border-4 border-red-500">
+            <i class="fas fa-fire text-6xl text-red-300 mb-4"></i>
+            <h2 class="text-3xl font-bold text-white mb-4">🔥 FIRE ACCIDENT DETECTED 🔥</h2>
+            <p class="text-red-200 mb-6">
+                Emergency response has been automatically activated!<br>
+                The safe button has changed to fire accident status.
+            </p>
+            <div class="space-y-2 text-left text-red-200 mb-6">
+                <p>✅ Emergency contacts notified</p>
+                <p>✅ Fire department alerted</p>
+                <p>✅ Evacuation procedures activated</p>
+                <p>✅ Status buttons updated automatically</p>
+            </div>
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" 
+                    class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-bold text-white">
+                ACKNOWLEDGE FIRE ACCIDENT
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Instructions -->
+    <div class="fixed bottom-4 right-4 bg-gray-800 p-4 rounded-lg shadow-lg max-w-sm border border-gray-600">
+        <h4 class="font-semibold text-white mb-2 flex items-center">
+            <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+            How It Works
+        </h4>
+        <div class="text-sm text-gray-300 space-y-2">
+            <p>🟢 <strong>Video 1 (Kitchen):</strong> 15-minute cycle</p>
+            <p>🟡 <strong>Video 2 (Electrical):</strong> 21-minute cycle</p>
+            <p>🔄 <strong>Auto-Update:</strong> Every 3 seconds</p>
+            <p>🚨 <strong>Button Changes:</strong> Automatic based on fire confidence</p>
+        </div>
+        <div class="mt-3 pt-3 border-t border-gray-600">
+            <div class="flex items-center text-xs text-gray-400">
+                <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                Live Progressive Detection Active
+            </div>
+        </div>
+    </div>
+
+    <!-- Backend API Scripts -->
+    <script src="js/api-integration.js"></script>
+    
+    <!-- Progressive Status Dashboard -->
+    <script src="js/progressive-status-dashboard.js"></script>
+
+    <!-- Additional UI Enhancements -->
+    <script>
+        // Enhanced emergency detection with visual effects
+        class EmergencyEffects {
+            constructor() {
+                this.isEmergencyActive = false;
+                this.monitorForEmergency();
+            }
+
+            monitorForEmergency() {
+                setInterval(() => {
+                    if (window.progressiveDashboard) {
+                        const emergencyDetected = window.progressiveDashboard.videos.some(v => v.status === 'fire_accident');
+                        
+                        if (emergencyDetected && !this.isEmergencyActive) {
+                            this.activateEmergencyMode();
+                        } else if (!emergencyDetected && this.isEmergencyActive) {
+                            this.deactivateEmergencyMode();
+                        }
+                    }
+                }, 2000);
+            }
+
+            activateEmergencyMode() {
+                this.isEmergencyActive = true;
+                console.log('🚨 EMERGENCY MODE ACTIVATED - Fire Accident Detected!');
+                
+                // Add emergency styling to body
+                document.body.classList.add('emergency-mode');
+                
+                // Add emergency CSS if not already present
+                if (!document.getElementById('emergency-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'emergency-styles';
+                    style.textContent = `
+                        .emergency-mode {
+                            animation: emergency-flash 2s infinite;
+                        }
+                        
+                        @keyframes emergency-flash {
+                            0%, 100% { box-shadow: inset 0 0 0 0px rgba(239, 68, 68, 0); }
+                            50% { box-shadow: inset 0 0 0 5px rgba(239, 68, 68, 0.3); }
+                        }
+                        
+                        .emergency-mode header {
+                            background: linear-gradient(90deg, #7f1d1d, #991b1b, #7f1d1d);
+                            animation: emergency-header 1s infinite;
+                        }
+                        
+                        @keyframes emergency-header {
+                            0%, 100% { background: linear-gradient(90deg, #7f1d1d, #991b1b, #7f1d1d); }
+                            50% { background: linear-gradient(90deg, #991b1b, #dc2626, #991b1b); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Show emergency overlay after 5 seconds
+                setTimeout(() => {
+                    if (this.isEmergencyActive) {
+                        document.getElementById('emergency-overlay').classList.remove('hidden');
+                        document.getElementById('emergency-overlay').classList.add('flex');
+                    }
+                }, 5000);
+                
+                // Update page title
+                document.title = '🚨 FIRE ACCIDENT - Progressive Fire Detection';
+            }
+
+            deactivateEmergencyMode() {
+                this.isEmergencyActive = false;
+                console.log('✅ Emergency mode deactivated - All safe');
+                
+                // Remove emergency styling
+                document.body.classList.remove('emergency-mode');
+                
+                // Hide emergency overlay
+                document.getElementById('emergency-overlay').classList.add('hidden');
+                document.getElementById('emergency-overlay').classList.remove('flex');
+                
+                // Restore page title
+                document.title = 'Progressive Fire Detection - Safe to Fire Accident Transition';
+            }
+        }
+
+        // Initialize emergency effects after page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                window.emergencyEffects = new EmergencyEffects();
+            }, 2000);
+        });
+
+        // Button click sound effects (optional)
+        function playButtonSound(type) {
+            // This would play appropriate sound for button state changes
+            console.log(`🔊 Button sound: ${type}`);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Monitoring - Fire Detection & Emergency Response</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Fire Detection & Emergency Response - Live Monitoring</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div id="connectionStatus" class="w-3 h-3 bg-gray-500 rounded-full"></div>
+                <span id="connectionText" class="text-sm text-gray-400">Not Connected</span>
+            </div>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-bell text-gray-400"></i>
+            </button>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-cog text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'index' %}" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-video"></i>
+                            <span>Live Monitoring</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'camera-feeds' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'incident-history' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'analytics' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'emergency-contacts' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'reports' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <!-- IP Camera Connection Section -->
+            <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-network-wired text-blue-500 text-2xl"></i>
+                        <h2 class="text-xl font-semibold">Connect IP Camera</h2>
+                    </div>
+                    <span class="text-sm text-gray-400">Enter camera details to start monitoring</span>
+                </div>
+
+                <!-- Connection Form -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left Side - Connection Form -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Camera Name</label>
+                            <input type="text" id="cameraName" placeholder="e.g., Main Entrance Camera" 
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">IP Address</label>
+                            <input type="text" id="ipAddress" placeholder="e.g., 192.168.1.100" 
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Port</label>
+                                <input type="text" id="port" placeholder="e.g., 554" value="554"
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Protocol</label>
+                                <select id="protocol" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
+                                    <option value="rtsp">RTSP</option>
+                                    <option value="http">HTTP</option>
+                                    <option value="https">HTTPS</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Username (Optional)</label>
+                                <input type="text" id="username" placeholder="admin" 
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Password (Optional)</label>
+                                <input type="password" id="password" placeholder="••••••••" 
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Stream Path (Optional)</label>
+                            <input type="text" id="streamPath" placeholder="e.g., /stream1 or /live/ch00_0" 
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none">
+                        </div>
+
+                        <!-- Generated URL Preview -->
+                        <div class="bg-gray-900 rounded-lg p-4">
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Stream URL Preview</label>
+                            <div id="urlPreview" class="text-green-400 font-mono text-sm break-all">
+                                rtsp://192.168.1.100:554/stream
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-4">
+                            <button onclick="connectCamera()" class="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-colors">
+                                <i class="fas fa-plug"></i>
+                                <span>Connect Camera</span>
+                            </button>
+                            <button onclick="testConnection()" class="bg-gray-600 hover:bg-gray-700 px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-colors">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Test</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Side - Quick Connect Options -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-gray-300">Quick Connect Options</h3>
+                        
+                        <!-- Common Camera Presets -->
+                        <div class="space-y-3 mb-6">
+                            <button onclick="loadPreset('hikvision')" class="w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg text-left flex items-center space-x-4 transition-colors">
+                                <i class="fas fa-camera text-blue-400 text-xl"></i>
+                                <div>
+                                    <div class="font-semibold">Hikvision Camera</div>
+                                    <div class="text-sm text-gray-400">RTSP: /Streaming/Channels/101</div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="loadPreset('dahua')" class="w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg text-left flex items-center space-x-4 transition-colors">
+                                <i class="fas fa-camera text-green-400 text-xl"></i>
+                                <div>
+                                    <div class="font-semibold">Dahua Camera</div>
+                                    <div class="text-sm text-gray-400">RTSP: /cam/realmonitor</div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="loadPreset('generic')" class="w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg text-left flex items-center space-x-4 transition-colors">
+                                <i class="fas fa-camera text-yellow-400 text-xl"></i>
+                                <div>
+                                    <div class="font-semibold">Generic IP Camera</div>
+                                    <div class="text-sm text-gray-400">RTSP: /stream or /live</div>
+                                </div>
+                            </button>
+
+                            <button onclick="loadPreset('webcam')" class="w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg text-left flex items-center space-x-4 transition-colors">
+                                <i class="fas fa-laptop text-purple-400 text-xl"></i>
+                                <div>
+                                    <div class="font-semibold">Local Webcam</div>
+                                    <div class="text-sm text-gray-400">Use device camera (ID: 0)</div>
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Connected Cameras List -->
+                        <h3 class="text-lg font-semibold mb-4 text-gray-300">Connected Cameras</h3>
+                        <div id="connectedCameras" class="space-y-2">
+                            <div class="bg-gray-900 rounded-lg p-4 text-center text-gray-500">
+                                <i class="fas fa-video-slash text-2xl mb-2"></i>
+                                <p>No cameras connected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Feed Preview Section -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-eye text-green-500 text-xl"></i>
+                        <h2 class="text-xl font-semibold">Live Feed Preview</h2>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="liveStatus" class="text-sm text-gray-400">Waiting for connection...</span>
+                        <button onclick="toggleFullscreen()" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Video Feed Display -->
+                <div id="feedContainer" class="relative bg-gray-900 rounded-lg overflow-hidden" style="min-height: 400px;">
+                    <!-- Placeholder when no feed -->
+                    <div id="feedPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                        <i class="fas fa-video text-6xl mb-4"></i>
+                        <p class="text-xl font-semibold mb-2">No Live Feed</p>
+                        <p class="text-sm">Connect a camera to start monitoring</p>
+                    </div>
+                    
+                    <!-- Video element for stream -->
+                    <video id="liveVideo" class="w-full h-full object-contain hidden" autoplay muted></video>
+                    <img id="liveImage" class="w-full h-full object-contain hidden" alt="Live Feed">
+                    
+                    <!-- Fire Detection Overlay -->
+                    <div id="detectionOverlay" class="absolute top-4 right-4 hidden">
+                        <div class="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 animate-pulse">
+                            <i class="fas fa-fire"></i>
+                            <span class="font-bold">FIRE DETECTED</span>
+                        </div>
+                    </div>
+
+                    <!-- Camera Info Overlay -->
+                    <div id="cameraInfoOverlay" class="absolute bottom-4 left-4 hidden">
+                        <div class="bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg">
+                            <div id="activeCameraName" class="font-semibold">Camera Name</div>
+                            <div id="activeCameraIP" class="text-sm text-gray-300">IP: 192.168.1.100</div>
+                        </div>
+                    </div>
+
+                    <!-- Stream Stats Overlay -->
+                    <div id="streamStats" class="absolute top-4 left-4 hidden">
+                        <div class="bg-black bg-opacity-70 text-white px-3 py-2 rounded-lg text-sm">
+                            <div><i class="fas fa-clock mr-2"></i><span id="streamDuration">00:00:00</span></div>
+                            <div><i class="fas fa-tachometer-alt mr-2"></i><span id="streamFPS">0 FPS</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feed Controls -->
+                <div class="flex items-center justify-between mt-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="startStopBtn" onclick="toggleStream()" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-semibold flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-play"></i>
+                            <span>Start Detection</span>
+                        </button>
+                        <button onclick="captureSnapshot()" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2 disabled:opacity-50" disabled id="snapshotBtn">
+                            <i class="fas fa-camera"></i>
+                            <span>Snapshot</span>
+                        </button>
+                        <button onclick="toggleRecording()" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2 disabled:opacity-50" disabled id="recordBtn">
+                            <i class="fas fa-circle text-red-500"></i>
+                            <span>Record</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm text-gray-400">
+                        <span>Fire Detection:</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="fireDetectionToggle" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Success Modal -->
+    <div id="connectionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 p-6 rounded-lg text-center max-w-md">
+            <div id="connectionModalIcon" class="text-6xl mb-4">
+                <i class="fas fa-check-circle text-green-500"></i>
+            </div>
+            <h2 id="connectionModalTitle" class="text-xl font-bold mb-2">Connection Successful</h2>
+            <p id="connectionModalMessage" class="text-gray-400 mb-4">Camera connected successfully. Starting fire detection...</p>
+            <button onclick="closeConnectionModal()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-semibold">
+                Continue
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let connectedCameras = [];
+        let isStreaming = false;
+        let isRecording = false;
+        let streamStartTime = null;
+        let streamTimer = null;
+
+        // Update URL preview in real-time
+        function updateUrlPreview() {
+            const protocol = document.getElementById('protocol').value;
+            const ip = document.getElementById('ipAddress').value || '192.168.1.100';
+            const port = document.getElementById('port').value || '554';
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const path = document.getElementById('streamPath').value || '/stream';
+            
+            let url = `${protocol}://`;
+            if (username && password) {
+                url += `${username}:${password}@`;
+            }
+            url += `${ip}:${port}${path}`;
+            
+            document.getElementById('urlPreview').textContent = url;
+        }
+
+        // Add event listeners for real-time URL preview
+        ['ipAddress', 'port', 'protocol', 'username', 'password', 'streamPath'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateUrlPreview);
+        });
+
+        // Load camera presets
+        function loadPreset(preset) {
+            const presets = {
+                hikvision: {
+                    port: '554',
+                    protocol: 'rtsp',
+                    streamPath: '/Streaming/Channels/101'
+                },
+                dahua: {
+                    port: '554',
+                    protocol: 'rtsp',
+                    streamPath: '/cam/realmonitor?channel=1&subtype=0'
+                },
+                generic: {
+                    port: '554',
+                    protocol: 'rtsp',
+                    streamPath: '/stream'
+                },
+                webcam: {
+                    port: '0',
+                    protocol: 'http',
+                    streamPath: '/webcam'
+                }
+            };
+            
+            const config = presets[preset];
+            document.getElementById('port').value = config.port;
+            document.getElementById('protocol').value = config.protocol;
+            document.getElementById('streamPath').value = config.streamPath;
+            updateUrlPreview();
+            
+            showNotification(`Loaded ${preset} preset configuration`);
+        }
+
+        // Connect camera
+        function connectCamera() {
+            const name = document.getElementById('cameraName').value || 'Camera ' + (connectedCameras.length + 1);
+            const ip = document.getElementById('ipAddress').value;
+            
+            if (!ip) {
+                showModal('error', 'Missing IP Address', 'Please enter a valid IP address for the camera.');
+                return;
+            }
+            
+            // Show connecting status
+            updateConnectionStatus('connecting');
+            
+            // Simulate connection (in real app, this would connect to backend)
+            setTimeout(() => {
+                const camera = {
+                    id: Date.now(),
+                    name: name,
+                    ip: ip,
+                    port: document.getElementById('port').value,
+                    protocol: document.getElementById('protocol').value,
+                    status: 'connected'
+                };
+                
+                connectedCameras.push(camera);
+                updateConnectedCamerasList();
+                updateConnectionStatus('connected');
+                showModal('success', 'Connection Successful', `${name} connected successfully at ${ip}`);
+                
+                // Enable controls
+                document.getElementById('startStopBtn').disabled = false;
+                document.getElementById('snapshotBtn').disabled = false;
+                document.getElementById('recordBtn').disabled = false;
+                
+                // Show feed area
+                showLiveFeed(camera);
+            }, 1500);
+        }
+
+        // Test connection
+        function testConnection() {
+            const ip = document.getElementById('ipAddress').value;
+            
+            if (!ip) {
+                showModal('error', 'Missing IP Address', 'Please enter an IP address to test.');
+                return;
+            }
+            
+            showNotification('Testing connection to ' + ip + '...');
+            
+            setTimeout(() => {
+                showModal('success', 'Connection Test', 'Camera at ' + ip + ' is reachable!');
+            }, 1000);
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus(status) {
+            const dot = document.getElementById('connectionStatus');
+            const text = document.getElementById('connectionText');
+            
+            switch(status) {
+                case 'connecting':
+                    dot.className = 'w-3 h-3 bg-yellow-500 rounded-full animate-pulse';
+                    text.textContent = 'Connecting...';
+                    break;
+                case 'connected':
+                    dot.className = 'w-3 h-3 bg-green-500 rounded-full animate-pulse';
+                    text.textContent = 'Connected';
+                    break;
+                case 'error':
+                    dot.className = 'w-3 h-3 bg-red-500 rounded-full';
+                    text.textContent = 'Connection Error';
+                    break;
+                default:
+                    dot.className = 'w-3 h-3 bg-gray-500 rounded-full';
+                    text.textContent = 'Not Connected';
+            }
+        }
+
+        // Update connected cameras list
+        function updateConnectedCamerasList() {
+            const container = document.getElementById('connectedCameras');
+            
+            if (connectedCameras.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-gray-900 rounded-lg p-4 text-center text-gray-500">
+                        <i class="fas fa-video-slash text-2xl mb-2"></i>
+                        <p>No cameras connected</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = connectedCameras.map(cam => `
+                <div class="bg-gray-700 rounded-lg p-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <div>
+                            <div class="font-semibold text-sm">${cam.name}</div>
+                            <div class="text-xs text-gray-400">${cam.ip}:${cam.port}</div>
+                        </div>
+                    </div>
+                    <button onclick="disconnectCamera(${cam.id})" class="text-red-400 hover:text-red-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Disconnect camera
+        function disconnectCamera(id) {
+            connectedCameras = connectedCameras.filter(c => c.id !== id);
+            updateConnectedCamerasList();
+            
+            if (connectedCameras.length === 0) {
+                updateConnectionStatus('disconnected');
+                hideLiveFeed();
+                document.getElementById('startStopBtn').disabled = true;
+                document.getElementById('snapshotBtn').disabled = true;
+                document.getElementById('recordBtn').disabled = true;
+            }
+        }
+
+        // Show live feed
+        function showLiveFeed(camera) {
+            document.getElementById('feedPlaceholder').classList.add('hidden');
+            document.getElementById('cameraInfoOverlay').classList.remove('hidden');
+            document.getElementById('streamStats').classList.remove('hidden');
+            document.getElementById('activeCameraName').textContent = camera.name;
+            document.getElementById('activeCameraIP').textContent = 'IP: ' + camera.ip;
+            document.getElementById('liveStatus').textContent = 'Ready to stream';
+            
+            // Show a placeholder image or video feed
+            const img = document.getElementById('liveImage');
+            img.src = 'data:image/svg+xml,' + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+                    <rect fill="#1a1a2e" width="800" height="450"/>
+                    <text x="400" y="200" font-family="Arial" font-size="24" fill="#4a5568" text-anchor="middle">Camera Feed: ${camera.name}</text>
+                    <text x="400" y="240" font-family="Arial" font-size="16" fill="#718096" text-anchor="middle">IP: ${camera.ip}</text>
+                    <text x="400" y="280" font-family="Arial" font-size="14" fill="#a0aec0" text-anchor="middle">Click "Start Detection" to begin</text>
+                </svg>
+            `);
+            img.classList.remove('hidden');
+        }
+
+        // Hide live feed
+        function hideLiveFeed() {
+            document.getElementById('feedPlaceholder').classList.remove('hidden');
+            document.getElementById('cameraInfoOverlay').classList.add('hidden');
+            document.getElementById('streamStats').classList.add('hidden');
+            document.getElementById('liveImage').classList.add('hidden');
+            document.getElementById('liveVideo').classList.add('hidden');
+            document.getElementById('liveStatus').textContent = 'Waiting for connection...';
+        }
+
+        // Toggle stream
+        function toggleStream() {
+            const btn = document.getElementById('startStopBtn');
+            
+            if (!isStreaming) {
+                isStreaming = true;
+                btn.innerHTML = '<i class="fas fa-stop"></i><span>Stop Detection</span>';
+                btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btn.classList.add('bg-red-600', 'hover:bg-red-700');
+                document.getElementById('liveStatus').textContent = 'Fire detection active';
+                
+                // Start stream timer
+                streamStartTime = Date.now();
+                streamTimer = setInterval(updateStreamDuration, 1000);
+                
+                // Simulate fire detection after random interval
+                setTimeout(() => {
+                    if (isStreaming && Math.random() > 0.3) {
+                        document.getElementById('detectionOverlay').classList.remove('hidden');
+                    }
+                }, 5000 + Math.random() * 10000);
+            } else {
+                isStreaming = false;
+                btn.innerHTML = '<i class="fas fa-play"></i><span>Start Detection</span>';
+                btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                btn.classList.add('bg-green-600', 'hover:bg-green-700');
+                document.getElementById('liveStatus').textContent = 'Detection stopped';
+                document.getElementById('detectionOverlay').classList.add('hidden');
+                
+                clearInterval(streamTimer);
+            }
+        }
+
+        // Update stream duration display
+        function updateStreamDuration() {
+            const elapsed = Math.floor((Date.now() - streamStartTime) / 1000);
+            const hours = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+            const minutes = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('streamDuration').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('streamFPS').textContent = Math.floor(25 + Math.random() * 5) + ' FPS';
+        }
+
+        // Capture snapshot
+        function captureSnapshot() {
+            showNotification('Snapshot captured and saved');
+        }
+
+        // Toggle recording
+        function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            isRecording = !isRecording;
+            
+            if (isRecording) {
+                btn.innerHTML = '<i class="fas fa-stop text-red-500"></i><span>Stop Recording</span>';
+                showNotification('Recording started');
+            } else {
+                btn.innerHTML = '<i class="fas fa-circle text-red-500"></i><span>Record</span>';
+                showNotification('Recording saved');
+            }
+        }
+
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            const container = document.getElementById('feedContainer');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Show modal
+        function showModal(type, title, message) {
+            const modal = document.getElementById('connectionModal');
+            const icon = document.getElementById('connectionModalIcon');
+            const titleEl = document.getElementById('connectionModalTitle');
+            const messageEl = document.getElementById('connectionModalMessage');
+            
+            if (type === 'success') {
+                icon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+            } else if (type === 'error') {
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+            }
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        // Close modal
+        function closeConnectionModal() {
+            const modal = document.getElementById('connectionModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-gray-700 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-pulse';
+            notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i>${message}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize
+        updateUrlPreview();
+    </script>
+</body>
+</html>

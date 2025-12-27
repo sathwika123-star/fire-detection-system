@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Feeds - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Camera Feeds Management</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-gray-400">All Cameras Online</span>
+            </div>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-bell text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="index.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-video"></i>
+                            <span>Live Monitoring</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="camera-feeds.html" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="incident-history.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="analytics.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="emergency-contacts.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <div class="mb-6">
+                <h2 class="text-2xl font-semibold mb-4">Camera Feeds Management</h2>
+                <div class="flex space-x-4 mb-6">
+                    <button id="startAllBtn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-play mr-2"></i>Start All Cameras
+                    </button>
+                    <button id="stopAllBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-stop mr-2"></i>Stop All Cameras
+                    </button>
+                    <button id="refreshBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh Feeds
+                    </button>
+                    <button id="addCameraBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-plus mr-2"></i>Add Camera
+                    </button>
+                </div>
+            </div>
+
+            <!-- Camera Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="cameraGrid">
+                <!-- Camera cards will be dynamically generated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CameraFeedsManager {
+            constructor() {
+                this.cameras = [
+                    { id: 1, name: "Block A - Lab 3", status: "online", recording: true, resolution: "1080p" },
+                    { id: 2, name: "Block B - Entrance", status: "online", recording: true, resolution: "720p" },
+                    { id: 3, name: "Block C - Corridor", status: "offline", recording: false, resolution: "1080p" },
+                    { id: 4, name: "Block A - Lab 1", status: "online", recording: true, resolution: "1080p" },
+                    { id: 5, name: "Block D - Cafeteria", status: "online", recording: false, resolution: "720p" },
+                    { id: 6, name: "Block E - Library", status: "online", recording: true, resolution: "1080p" },
+                    { id: 7, name: "Block F - Auditorium", status: "online", recording: true, resolution: "4K" },
+                    { id: 8, name: "Block G - Parking", status: "maintenance", recording: false, resolution: "720p" }
+                ];
+                this.init();
+            }
+
+            init() {
+                this.renderCameras();
+                this.bindEvents();
+                this.startStatusUpdates();
+            }
+
+            renderCameras() {
+                const grid = document.getElementById('cameraGrid');
+                grid.innerHTML = '';
+
+                this.cameras.forEach(camera => {
+                    const cameraCard = this.createCameraCard(camera);
+                    grid.appendChild(cameraCard);
+                });
+            }
+
+            createCameraCard(camera) {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800 rounded-lg overflow-hidden border border-gray-700';
+                
+                const statusColor = {
+                    'online': 'bg-green-500',
+                    'offline': 'bg-red-500',
+                    'maintenance': 'bg-yellow-500'
+                }[camera.status];
+
+                const statusIcon = {
+                    'online': 'fas fa-circle',
+                    'offline': 'fas fa-exclamation-circle',
+                    'maintenance': 'fas fa-wrench'
+                }[camera.status];
+
+                card.innerHTML = `
+                    <div class="relative">
+                        <div class="w-full h-48 bg-gray-700 flex items-center justify-center">
+                            ${camera.status === 'online' ? 
+                                '<i class="fas fa-video text-blue-500 text-4xl"></i>' :
+                                '<i class="fas fa-video-slash text-gray-500 text-4xl"></i>'
+                            }
+                        </div>
+                        <div class="absolute top-2 right-2 flex space-x-2">
+                            <span class="${statusColor} text-white px-2 py-1 rounded text-xs">
+                                <i class="${statusIcon} mr-1"></i>${camera.status.toUpperCase()}
+                            </span>
+                            ${camera.recording ? 
+                                '<span class="bg-red-600 text-white px-2 py-1 rounded text-xs"><i class="fas fa-record-vinyl mr-1"></i>REC</span>' : 
+                                ''
+                            }
+                        </div>
+                        <div class="absolute bottom-2 left-2">
+                            <span class="bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                                ${camera.name}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-semibold">${camera.name}</h3>
+                            <span class="text-xs text-gray-400">${camera.resolution}</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm" onclick="viewCamera(${camera.id})">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button class="flex-1 bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm" onclick="configureCamera(${camera.id})">
+                                <i class="fas fa-cog mr-1"></i>Config
+                            </button>
+                            <button class="bg-${camera.recording ? 'red' : 'green'}-600 hover:bg-${camera.recording ? 'red' : 'green'}-700 px-3 py-1 rounded text-sm" onclick="toggleRecording(${camera.id})">
+                                <i class="fas fa-${camera.recording ? 'stop' : 'play'} mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                return card;
+            }
+
+            bindEvents() {
+                document.getElementById('startAllBtn').addEventListener('click', () => this.startAllCameras());
+                document.getElementById('stopAllBtn').addEventListener('click', () => this.stopAllCameras());
+                document.getElementById('refreshBtn').addEventListener('click', () => this.refreshFeeds());
+                document.getElementById('addCameraBtn').addEventListener('click', () => this.addCamera());
+            }
+
+            startAllCameras() {
+                this.cameras.forEach(camera => {
+                    if (camera.status !== 'maintenance') {
+                        camera.status = 'online';
+                        camera.recording = true;
+                    }
+                });
+                this.renderCameras();
+                this.showNotification('All cameras started successfully', 'success');
+            }
+
+            stopAllCameras() {
+                this.cameras.forEach(camera => {
+                    if (camera.status === 'online') {
+                        camera.recording = false;
+                    }
+                });
+                this.renderCameras();
+                this.showNotification('All cameras stopped', 'warning');
+            }
+
+            refreshFeeds() {
+                this.showNotification('Refreshing camera feeds...', 'info');
+                setTimeout(() => {
+                    this.renderCameras();
+                    this.showNotification('Camera feeds refreshed', 'success');
+                }, 2000);
+            }
+
+            addCamera() {
+                const newId = Math.max(...this.cameras.map(c => c.id)) + 1;
+                const newCamera = {
+                    id: newId,
+                    name: `Camera ${newId}`,
+                    status: 'online',
+                    recording: false,
+                    resolution: '1080p'
+                };
+                this.cameras.push(newCamera);
+                this.renderCameras();
+                this.showNotification('New camera added', 'success');
+            }
+
+            startStatusUpdates() {
+                setInterval(() => {
+                    // Simulate random status changes
+                    if (Math.random() < 0.1) {
+                        const randomCamera = this.cameras[Math.floor(Math.random() * this.cameras.length)];
+                        if (randomCamera.status === 'online' && Math.random() < 0.3) {
+                            randomCamera.status = 'offline';
+                        } else if (randomCamera.status === 'offline' && Math.random() < 0.7) {
+                            randomCamera.status = 'online';
+                        }
+                        this.renderCameras();
+                    }
+                }, 10000);
+            }
+
+            showNotification(message, type) {
+                const notification = document.createElement('div');
+                const colors = {
+                    success: 'bg-green-600',
+                    warning: 'bg-yellow-600',
+                    error: 'bg-red-600',
+                    info: 'bg-blue-600'
+                };
+                
+                notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // Global functions for camera actions
+        function viewCamera(id) {
+            window.open(`camera-view.html?id=${id}`, '_blank');
+        }
+
+        function configureCamera(id) {
+            alert(`Opening configuration for Camera ${id}`);
+        }
+
+        function toggleRecording(id) {
+            const camera = window.cameraManager.cameras.find(c => c.id === id);
+            if (camera) {
+                camera.recording = !camera.recording;
+                window.cameraManager.renderCameras();
+                window.cameraManager.showNotification(
+                    `Camera ${id} recording ${camera.recording ? 'started' : 'stopped'}`,
+                    camera.recording ? 'success' : 'warning'
+                );
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.cameraManager = new CameraFeedsManager();
+        });
+    </script>
+</body>
+</html>

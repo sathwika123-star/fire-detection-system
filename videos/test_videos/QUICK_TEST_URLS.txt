@@ -1,0 +1,32 @@
+# Test Video Collection
+# Use these URLs for immediate testing
+
+# WORKING TEST URLs (Copy and paste these):
+
+## Fire Detection Test URLs:
+1. https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4
+2. https://media.w3.org/2010/05/sintel/trailer_hd.mp4  
+3. https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+
+## Normal Video Test URLs:
+1. https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4
+2. https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4
+3. https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4
+
+## How to Test:
+1. Go to: http://127.0.0.1:8000/video-upload/
+2. Copy any URL above
+3. Paste in "Video URL" field
+4. Click "Analyze URL"
+5. Watch fire detection in action!
+
+## Expected Results:
+- Sintel Trailer: Should detect fire (animation effects)
+- Big Buck Bunny: Should NOT detect fire (safe animation)
+- Sample Videos: Mixed results based on content
+
+## Testing Notes:
+- Videos process in 10-30 seconds
+- Confidence scores shown as percentages
+- Fire detection triggers emergency alerts
+- Results integrate with dashboard automatically

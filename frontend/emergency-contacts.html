@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Contacts - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Emergency Contacts</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-sm text-gray-400">System Online</span>
+            </div>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-bell text-gray-400"></i>
+            </button>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-cog text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="index.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="camera-feeds.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="incident-history.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="analytics.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="emergency-contacts.html" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <!-- Quick Actions -->
+            <div class="bg-gray-800 p-4 rounded-lg mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <h2 class="text-xl font-semibold">Emergency Response Team</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="alertAllContacts()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-phone mr-2"></i>Alert All
+                        </button>
+                        <button onclick="sendBulkEmail()" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-envelope mr-2"></i>Send Email
+                        </button>
+                        <button onclick="openAddContactModal()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-plus mr-2"></i>Add Contact
+                        </button>
+                        <button onclick="testAllContacts()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-check-circle mr-2"></i>Test All
+                        </button>
+                        <button onclick="refreshContacts()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-sync mr-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Categories Container (dynamically populated) -->
+            <div id="contactsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Contacts will be loaded here dynamically -->
+                <div class="col-span-full text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+                    <p class="text-gray-400">Loading emergency contacts...</p>
+                </div>
+            </div>
+
+            <!-- Contact Management Table -->
+            <div class="bg-gray-800 rounded-lg overflow-hidden">
+                <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">All Emergency Contacts</h3>
+                    <div class="flex space-x-2">
+                        <button class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
+                            <i class="fas fa-plus mr-1"></i>Add
+                        </button>
+                        <button class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">
+                            <i class="fas fa-download mr-1"></i>Export
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="contactsTable" class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Name</th>
+                                <th class="px-4 py-3 text-left">Title</th>
+                                <th class="px-4 py-3 text-left">Phone</th>
+                                <th class="px-4 py-3 text-left">Email</th>
+                                <th class="px-4 py-3 text-left">Category</th>
+                                <th class="px-4 py-3 text-left">Priority</th>
+                                <th class="px-4 py-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <!-- Table rows will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Contact Modal -->
+    <div id="contactModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="modalTitle" class="text-xl font-semibold">Add Contact</h3>
+                <button onclick="closeContactModal()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="contactForm" onsubmit="saveContact(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Name *</label>
+                        <input type="text" id="contactName" required 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Title *</label>
+                        <input type="text" id="contactTitle" required 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Phone *</label>
+                        <input type="tel" id="contactPhone" required 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="contactEmail" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Category *</label>
+                        <select id="contactCategory" required 
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                            <option value="fire_department">Fire Department</option>
+                            <option value="medical">Medical</option>
+                            <option value="police">Police</option>
+                            <option value="security">Security</option>
+                            <option value="management">Management</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Priority</label>
+                        <select id="contactPriority" 
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2 mt-6">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>Save Contact
+                    </button>
+                    <button type="button" onclick="closeContactModal()" class="flex-1 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://127.0.0.1:8000/api';
+        
+        // Section configuration - organize contacts into display sections
+        const SECTION_CONFIG = {
+            'primary': {
+                label: 'Primary Emergency Contacts',
+                subtitle: 'Critical emergency response personnel',
+                color: 'red',
+                icon: 'exclamation-triangle',
+                categories: ['fire_department']
+            },
+            'medical': {
+                label: 'Medical Emergency',
+                subtitle: 'Medical response and healthcare personnel',
+                color: 'green',
+                icon: 'ambulance',
+                categories: ['medical']
+            },
+            'internal': {
+                label: 'Internal Staff',
+                subtitle: 'Building management and security personnel',
+                color: 'blue',
+                icon: 'users',
+                categories: ['security', 'management']
+            },
+            'external': {
+                label: 'External Services',
+                subtitle: 'Third-party emergency services',
+                color: 'purple',
+                icon: 'building',
+                categories: ['police']
+            }
+        };
+        
+        // Load emergency contacts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEmergencyContacts();
+            // Refresh contacts every 30 seconds
+            setInterval(loadEmergencyContacts, 30000);
+        });
+        
+        // Load emergency contacts from database
+        async function loadEmergencyContacts() {
+            try {
+                console.log('Loading emergency contacts from API...');
+                const response = await fetch(`${API_BASE_URL}/emergency-contacts/active_contacts/`);
+                console.log('Response status:', response.status);
+                
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                if (data.success && data.contacts) {
+                    console.log('Number of contacts:', data.contacts.length);
+                    console.log('Contacts:', data.contacts);
+                    displayContacts(data.contacts);
+                    updateContactsTable(data.contacts);
+                } else {
+                    console.error('Failed to load contacts:', data);
+                    showError('Failed to load contacts');
+                }
+            } catch (error) {
+                console.error('Error loading contacts:', error);
+                showError('Error connecting to server: ' + error.message);
+            }
+        }
+        
+        // Display contacts in category cards
+        function displayContacts(contacts) {
+            console.log('displayContacts called with:', contacts);
+            const container = document.getElementById('contactsContainer');
+            
+            if (!container) {
+                console.error('Container element not found!');
+                return;
+            }
+            
+            // Build HTML for each section
+            let html = '';
+            Object.keys(SECTION_CONFIG).forEach(sectionKey => {
+                const section = SECTION_CONFIG[sectionKey];
+                
+                // Filter contacts for this section
+                const sectionContacts = contacts.filter(contact => 
+                    section.categories.includes(contact.category)
+                );
+                
+                console.log(`Section ${sectionKey} (${section.label}):`, sectionContacts.length, 'contacts');
+                
+                html += `
+                    <div class="bg-gray-800 rounded-lg">
+                        <div class="p-4 border-b border-gray-700 bg-${section.color}-600 rounded-t-lg">
+                            <h3 class="text-lg font-semibold flex items-center">
+                                <i class="fas fa-${section.icon} mr-2"></i>
+                                ${section.label}
+                            </h3>
+                            <p class="text-sm text-gray-200 mt-1">${section.subtitle}</p>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            ${sectionContacts.length > 0 ? sectionContacts.map(contact => {
+                                // Determine priority badge
+                                const priorityBadge = contact.priority === 'high' 
+                                    ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-600 text-white ml-2"><i class="fas fa-circle text-xs mr-1"></i>HIGH</span>'
+                                    : '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-600 text-white ml-2"><i class="fas fa-circle text-xs mr-1"></i>MEDIUM</span>';
+                                
+                                return `
+                                <div class="flex items-center justify-between border-b border-gray-700 pb-3 last:border-0">
+                                    <div class="flex-1">
+                                        <div class="font-medium text-lg flex items-center">
+                                            ${contact.name}
+                                            ${priorityBadge}
+                                        </div>
+                                        <div class="text-sm text-gray-400 mt-1">${contact.title}</div>
+                                        <div class="flex items-center mt-2 space-x-4">
+                                            <div class="flex items-center text-sm text-blue-400">
+                                                <i class="fas fa-phone mr-2"></i>
+                                                ${contact.phone || 'N/A'}
+                                            </div>
+                                            ${contact.email ? `
+                                                <div class="flex items-center text-sm text-green-400">
+                                                    <i class="fas fa-envelope mr-2"></i>
+                                                    ${contact.email}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col space-y-2 ml-4">
+                                        <button onclick="callContact('${contact.phone}')" 
+                                                class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm flex items-center" 
+                                                title="Call">
+                                            <i class="fas fa-phone mr-2"></i>Call
+                                        </button>
+                                        ${contact.email ? `
+                                            <button onclick="sendTestEmail('${contact.id}')" 
+                                                    class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm flex items-center" 
+                                                    title="Send SMS">
+                                                <i class="fas fa-sms mr-2"></i>SMS
+                                            </button>
+                                        ` : ''}
+                                        <button onclick="editContact('${contact.id}')" 
+                                                class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm flex items-center" 
+                                                title="Edit">
+                                            <i class="fas fa-edit mr-2"></i>Edit
+                                        </button>
+                                        <button onclick="deleteContact('${contact.id}')" 
+                                                class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm flex items-center" 
+                                                title="Delete">
+                                            <i class="fas fa-trash mr-2"></i>Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            `}).join('') : '<p class="text-gray-500 text-center py-8">No contacts in this section</p>'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Update contacts table
+        function updateContactsTable(contacts) {
+            const tbody = document.querySelector('#contactsTable tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = contacts.map(contact => {
+                const priorityColor = contact.priority === 'high' ? 'red' : 'yellow';
+                const categoryLabel = getCategoryLabel(contact.category);
+                
+                return `
+                <tr class="hover:bg-gray-700">
+                    <td class="px-4 py-3">${contact.name}</td>
+                    <td class="px-4 py-3">${contact.title}</td>
+                    <td class="px-4 py-3">${contact.phone || 'N/A'}</td>
+                    <td class="px-4 py-3">${contact.email || 'N/A'}</td>
+                    <td class="px-4 py-3">
+                        <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs">
+                            ${categoryLabel}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="bg-${priorityColor}-600 text-white px-2 py-1 rounded text-xs uppercase">
+                            ${contact.priority}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button onclick="callContact('${contact.phone}')" 
+                                    class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs">
+                                <i class="fas fa-phone"></i>
+                            </button>
+                            ${contact.email ? `
+                                <button onclick="sendTestEmail('${contact.id}')" 
+                                        class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                            ` : ''}
+                            <button onclick="editContact('${contact.id}')" 
+                                    class="bg-gray-600 hover:bg-gray-700 px-2 py-1 rounded text-xs">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+        
+        // Get category display label
+        function getCategoryLabel(category) {
+            const labels = {
+                'fire_department': 'Fire Department',
+                'medical': 'Medical',
+                'police': 'Police',
+                'security': 'Security',
+                'management': 'Management'
+            };
+            return labels[category] || category;
+        }
+        
+        // Send test email to a specific contact
+        async function sendTestEmail(contactId) {
+            try {
+                showLoading('Sending test email...');
+                const response = await fetch(`${API_BASE_URL}/emergency-contacts/${contactId}/send_test_email/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                hideLoading();
+                
+                if (data.success) {
+                    showSuccess(`Test email sent to ${data.contact}`);
+                } else {
+                    showError(data.message || 'Failed to send test email');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error sending test email:', error);
+                showError('Error sending test email');
+            }
+        }
+        
+        // Test all contacts
+        async function testAllContacts() {
+            if (!confirm('Send test emails to all emergency contacts?')) return;
+            
+            try {
+                showLoading('Testing all contacts...');
+                const response = await fetch(`${API_BASE_URL}/emergency-contacts/test_all_contacts/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                hideLoading();
+                
+                if (data.success) {
+                    showSuccess(`${data.message}\nSuccessful: ${data.successful_sends}/${data.total_contacts}`);
+                } else {
+                    showError(data.message || 'Failed to test contacts');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error testing contacts:', error);
+                showError('Error testing contacts');
+            }
+        }
+        
+        // Send bulk email
+        async function sendBulkEmail() {
+            const subject = prompt('Enter email subject:');
+            if (!subject) return;
+            
+            const message = prompt('Enter email message:');
+            if (!message) return;
+            
+            try {
+                showLoading('Sending bulk email...');
+                const response = await fetch(`${API_BASE_URL}/emergency-contacts/send_bulk_email/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ subject, message })
+                });
+                
+                const data = await response.json();
+                hideLoading();
+                
+                if (data.success) {
+                    showSuccess(`Email sent to ${data.sent_count} contacts`);
+                } else {
+                    showError(data.message || 'Failed to send bulk email');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error sending bulk email:', error);
+                showError('Error sending bulk email');
+            }
+        }
+        
+        // Alert all contacts
+        async function alertAllContacts() {
+            if (!confirm('Send emergency alert to all contacts?')) return;
+            
+            const message = prompt('Enter alert message:', 'Emergency fire alert - immediate response required');
+            if (!message) return;
+            
+            try {
+                showLoading('Sending emergency alerts...');
+                // This requires an incident ID - for demo purposes, we'll show a message
+                showError('Please trigger an emergency alert from an active fire incident');
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                console.error('Error sending alerts:', error);
+                showError('Error sending emergency alerts');
+            }
+        }
+        
+        // Call contact (placeholder)
+        function callContact(phone) {
+            if (phone && phone !== 'N/A') {
+                alert(`Initiating call to ${phone}`);
+                // In production, this would integrate with a calling system
+            }
+        }
+        
+        // Refresh contacts
+        function refreshContacts() {
+            showLoading('Refreshing contacts...');
+            loadEmergencyContacts();
+            setTimeout(hideLoading, 500);
+        }
+        
+        // Edit contact (placeholder)
+        async function editContact(contactId) {
+            try {
+                showLoading('Loading contact...');
+                const response = await fetch(`${API_BASE_URL}/emergency-contacts/${contactId}/`);
+                const contact = await response.json();
+                hideLoading();
+                
+                if (contact) {
+                    // Populate form
+                    document.getElementById('modalTitle').textContent = 'Edit Contact';
+                    document.getElementById('contactName').value = contact.name;
+                    document.getElementById('contactTitle').value = contact.title;
+                    document.getElementById('contactPhone').value = contact.phone;
+                    document.getElementById('contactEmail').value = contact.email || '';
+                    document.getElementById('contactCategory').value = contact.category;
+                    document.getElementById('contactPriority').value = contact.priority;
+                    
+                    // Store contact ID for update
+                    document.getElementById('contactForm').setAttribute('data-contact-id', contactId);
+                    
+                    // Open modal
+                    document.getElementById('contactModal').classList.remove('hidden');
+                } else {
+                    showError('Contact not found');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error loading contact:', error);
+                showError('Error loading contact');
+            }
+        }
+        
+        // Delete contact
+        async function deleteContact(contactId) {
+            if (!confirm('Are you sure you want to delete this contact?')) return;
+            
+            try {
+                showLoading('Deleting contact...');
+                const response = await fetch(`${API_BASE_URL}/emergency-contacts/${contactId}/`, {
+                    method: 'DELETE'
+                });
+                
+                hideLoading();
+                
+                if (response.ok) {
+                    showSuccess('Contact deleted successfully');
+                    loadEmergencyContacts(); // Refresh the list
+                } else {
+                    showError('Failed to delete contact');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error deleting contact:', error);
+                showError('Error deleting contact');
+            }
+        }
+        
+        // Add contact modal (placeholder)
+        function openAddContactModal() {
+            document.getElementById('modalTitle').textContent = 'Add Contact';
+            document.getElementById('contactForm').reset();
+            document.getElementById('contactForm').removeAttribute('data-contact-id');
+            document.getElementById('contactModal').classList.remove('hidden');
+        }
+        
+        // Close contact modal
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.add('hidden');
+        }
+        
+        // Save contact
+        async function saveContact(event) {
+            event.preventDefault();
+            
+            const contactData = {
+                name: document.getElementById('contactName').value,
+                title: document.getElementById('contactTitle').value,
+                phone: document.getElementById('contactPhone').value,
+                email: document.getElementById('contactEmail').value,
+                category: document.getElementById('contactCategory').value,
+                priority: document.getElementById('contactPriority').value,
+                is_available: true
+            };
+            
+            const contactId = document.getElementById('contactForm').getAttribute('data-contact-id');
+            const isEdit = !!contactId;
+            
+            // Generate UUID for new contacts
+            if (!isEdit) {
+                contactData.id = generateUUID();
+            }
+            
+            try {
+                showLoading(isEdit ? 'Updating contact...' : 'Adding contact...');
+                
+                const url = isEdit 
+                    ? `${API_BASE_URL}/emergency-contacts/${contactId}/`
+                    : `${API_BASE_URL}/emergency-contacts/`;
+                    
+                const method = isEdit ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                });
+                
+                hideLoading();
+                
+                if (response.ok) {
+                    showSuccess(isEdit ? 'Contact updated successfully!' : 'Contact added successfully!');
+                    closeContactModal();
+                    loadEmergencyContacts(); // Refresh the list
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Save error:', errorData);
+                    showError(errorData.message || errorData.detail || 'Failed to save contact');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Error saving contact:', error);
+                showError('Error saving contact: ' + error.message);
+            }
+        }
+        
+        // Generate UUID v4
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+        
+        // Helper functions
+        function getCategoryColor(category) {
+            return CATEGORY_CONFIG[category]?.color || 'gray';
+        }
+        
+        function showLoading(message) {
+            // Create or update loading overlay
+            let overlay = document.getElementById('loadingOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'loadingOverlay';
+                overlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                document.body.appendChild(overlay);
+            }
+            overlay.innerHTML = `
+                <div class="bg-gray-800 p-6 rounded-lg text-center">
+                    <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+                    <p class="text-white">${message}</p>
+                </div>
+            `;
+            overlay.style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+        
+        function showSuccess(message) {
+            alert('✅ ' + message);
+        }
+        
+        function showError(message) {
+            alert('❌ ' + message);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Detection System - Launch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+    <div class="text-center">
+        <div class="mb-8">
+            <i class="fas fa-fire text-red-500 text-6xl mb-4"></i>
+            <h1 class="text-4xl font-bold mb-2">Fire Detection & Emergency Response</h1>
+            <p class="text-gray-400 text-lg">Intelligent Real-time Monitoring System</p>
+        </div>
+        
+        <div class="space-y-4 max-w-md mx-auto">
+            <a href="{% url 'index' %}" class="block bg-red-600 hover:bg-red-700 p-4 rounded-lg transition-colors">
+                <i class="fas fa-video text-2xl mb-2"></i>
+                <div class="font-semibold">Main Monitoring Interface</div>
+                <div class="text-sm opacity-75">Live fire detection view (matches your image)</div>
+            </a>
+            
+            <a href="{% url 'dashboard' %}" class="block bg-blue-600 hover:bg-blue-700 p-4 rounded-lg transition-colors">
+                <i class="fas fa-tachometer-alt text-2xl mb-2"></i>
+                <div class="font-semibold">Complete Control Dashboard</div>
+                <div class="text-sm opacity-75">Full system control panel with multiple cameras</div>
+            </a>
+        </div>
+        
+        <div class="mt-12 text-sm text-gray-500">
+            <p>System Features:</p>
+            <div class="flex justify-center space-x-6 mt-2">
+                <span><i class="fas fa-fire mr-1"></i>Fire Detection</span>
+                <span><i class="fas fa-users mr-1"></i>People Counting</span>
+                <span><i class="fas fa-bell mr-1"></i>Emergency Alerts</span>
+                <span><i class="fas fa-camera mr-1"></i>Live Monitoring</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some entrance animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = document.querySelectorAll('div, a');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.5s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

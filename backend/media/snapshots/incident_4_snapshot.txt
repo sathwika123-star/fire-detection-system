@@ -1,0 +1,5 @@
+Fire Incident Snapshot - ID: 4
+Timestamp: 2025-10-25 14:20:57
+Location: Mall Retail Section
+Confidence Level: 87.5%
+Status: Fire Detected - Emergency Response Activated

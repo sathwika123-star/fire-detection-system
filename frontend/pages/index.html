@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Detection & Emergency Response</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <h1 class="text-xl font-semibold">Fire Detection & Emergency Response</h1>
+        <div class="flex items-center space-x-4">
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-bell text-gray-400"></i>
+            </button>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-question-circle text-gray-400"></i>
+            </button>
+            <button class="p-2 hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-sync-alt text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <!-- Main Feed Section -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4">Main Feed</h2>
+                <div class="relative bg-gray-800 rounded-lg overflow-hidden">
+                    <img id="mainFeedImage" src="fire-kitchen.jpg" alt="Main Feed" class="w-full h-96 object-cover">
+                    <div class="absolute top-4 right-4">
+                        <span id="statusBadge" class="bg-red-500 text-white px-3 py-1 rounded-lg font-medium">
+                            Fire Detected
+                        </span>
+                    </div>
+                    <div class="absolute bottom-4 left-4">
+                        <h3 id="locationTitle" class="text-lg font-semibold">Block A – Lab 3</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Snapshot Section -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold">Snapshot</h2>
+                    <span id="snapshotTime" class="text-gray-400">14/01/2023 2:40 PM</span>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden">
+                    <img id="snapshotImage" src="fire-kitchen-annotated.jpg" alt="Snapshot" class="w-full h-64 object-cover">
+                    <div class="p-4">
+                        <span id="snapshotDate" class="text-gray-400">14/01/2023 2:40 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="w-96 bg-gray-800 p-6 border-l border-gray-700">
+            <!-- Fire Alert Section -->
+            <div class="mb-8">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-fire text-red-500 text-xl mr-3"></i>
+                    <h2 class="text-xl font-semibold">Fire Detected</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Location</span>
+                        <span class="text-gray-400">Time</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span id="alertLocation">Block A – Lab 3</span>
+                        <span id="alertTime">14/01/2023 2:40 PM</span>
+                    </div>
+                    
+                    <div class="flex justify-between mt-6">
+                        <span class="text-gray-400">Severity</span>
+                        <span class="text-gray-400">People Count</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-24 h-2 bg-gray-600 rounded-full mr-2">
+                                <div id="severityBar" class="h-2 bg-red-500 rounded-full" style="width: 92%"></div>
+                            </div>
+                            <span id="severityValue" class="text-sm">0.92</span>
+                        </div>
+                        <span id="peopleCount" class="text-2xl font-bold">3</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-2 mt-6">
+                    <button class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-sms mr-2"></i>
+                        SMS
+                    </button>
+                    <button class="flex-1 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-envelope mr-2"></i>
+                        Email
+                    </button>
+                    <button class="flex-1 bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-bell mr-2"></i>
+                        Alert
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Incidents -->
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Recent Incidents</h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between text-sm text-gray-400 border-b border-gray-700 pb-2">
+                        <span>Date</span>
+                        <span>Location</span>
+                        <span>Severity</span>
+                        <span>Status</span>
+                    </div>
+                    
+                    <div class="incident-row flex justify-between items-center py-2 text-sm">
+                        <span class="text-gray-300">14/01/2023</span>
+                        <span class="text-gray-300">Block A – Lab 3</span>
+                        <div class="w-4 h-2 bg-yellow-500 rounded-full"></div>
+                        <span class="text-red-400">Fire</span>
+                    </div>
+                    
+                    <div class="incident-row flex justify-between items-center py-2 text-sm">
+                        <span class="text-gray-300">14/01/2023</span>
+                        <span class="text-gray-300">Block B – Entrance</span>
+                        <div class="w-4 h-2 bg-orange-500 rounded-full"></div>
+                        <span class="text-red-400">Fire</span>
+                    </div>
+                    
+                    <div class="incident-row flex justify-between items-center py-2 text-sm">
+                        <span class="text-gray-300">14/01/2023</span>
+                        <span class="text-gray-300">Block C – Corridor</span>
+                        <div class="w-4 h-2 bg-orange-500 rounded-full"></div>
+                        <span class="text-red-400">Fire</span>
+                    </div>
+                    
+                    <div class="incident-row flex justify-between items-center py-2 text-sm">
+                        <span class="text-gray-300">14/01/2023</span>
+                        <span class="text-gray-300">Block C – Centre</span>
+                        <div class="w-4 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-green-400">Safe</span>
+                    </div>
+                    
+                    <div class="incident-row flex justify-between items-center py-2 text-sm">
+                        <span class="text-gray-300">14/01/2023</span>
+                        <span class="text-gray-300">Block C – Corridor</span>
+                        <div class="w-4 h-2 bg-green-500 rounded-full"></div>
+                        <span class="text-green-400">Safe</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Siren Modal -->
+    <div id="sirenModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-red-600 p-8 rounded-lg text-center animate-pulse">
+            <i class="fas fa-exclamation-triangle text-6xl text-white mb-4"></i>
+            <h2 class="text-2xl font-bold text-white mb-4">EMERGENCY ALERT</h2>
+            <p class="text-white mb-4">Fire detected in <span id="emergencyLocation">Block A – Lab 3</span></p>
+            <button onclick="closeSiren()" class="bg-white text-red-600 px-6 py-2 rounded-lg font-bold">
+                ACKNOWLEDGE
+            </button>
+        </div>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

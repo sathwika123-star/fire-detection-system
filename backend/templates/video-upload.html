@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="max-w-4xl mx-auto p-6">
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h1 class="text-2xl font-bold mb-6">
+                <i class="fas fa-upload mr-2 text-blue-500"></i>
+                Upload Video for Fire Detection
+            </h1>
+            
+            <!-- File Upload Section -->
+            <div class="mb-8">
+                <div class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
+                    <input type="file" id="videoFile" accept="video/*" class="hidden">
+                    <label for="videoFile" class="cursor-pointer">
+                        <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                        <p class="text-lg mb-2">Click to upload video file</p>
+                        <p class="text-sm text-gray-400">Supports MP4, AVI, MOV formats</p>
+                    </label>
+                </div>
+                <div id="fileInfo" class="mt-4 hidden">
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold" id="fileName"></p>
+                                <p class="text-sm text-gray-400" id="fileSize"></p>
+                            </div>
+                            <button id="uploadBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                                <i class="fas fa-fire mr-2"></i>Detect Fire
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- URL Input Section -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4">Or Use Public Video URL</h2>
+                <div class="flex space-x-4">
+                    <input 
+                        type="text" 
+                        id="videoUrl" 
+                        placeholder="Paste public video URL here (YouTube, Drive, etc.)"
+                        class="flex-1 px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white"
+                    >
+                    <button id="processUrlBtn" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg">
+                        <i class="fas fa-fire mr-2"></i>Analyze URL
+                    </button>
+                </div>
+                <p class="text-sm text-gray-400 mt-2">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Test URLs: 
+                    <a href="#" class="text-blue-400 hover:underline" onclick="fillTestUrl('fire')">Fire Video</a> | 
+                    <a href="#" class="text-blue-400 hover:underline" onclick="fillTestUrl('normal')">Normal Video</a>
+                </p>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="bg-blue-900 rounded-lg p-4">
+                <h3 class="font-semibold mb-2">
+                    <i class="fas fa-lightbulb mr-2"></i>Instructions
+                </h3>
+                <ul class="text-sm space-y-1">
+                    <li>• Upload video files (MP4, AVI, MOV) or paste public URLs</li>
+                    <li>• The system will analyze the video for fire detection</li>
+                    <li>• Results will show confidence scores and timestamps</li>
+                    <li>• Emergency alerts will be triggered if fire is detected</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Back Button -->
+        <div class="mt-6">
+            <a href="/video-recordings/" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg inline-block">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Recordings
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Test video URLs
+        const testUrls = {
+            'fire': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            'normal': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+        };
+        
+        function fillTestUrl(type) {
+            document.getElementById('videoUrl').value = testUrls[type];
+        }
+        
+        // File upload handling
+        document.getElementById('videoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = formatFileSize(file.size);
+                document.getElementById('fileInfo').classList.remove('hidden');
+            }
+        });
+        
+        // Upload button handler
+        document.getElementById('uploadBtn').addEventListener('click', function() {
+            const file = document.getElementById('videoFile').files[0];
+            if (file) {
+                processVideoFile(file);
+            }
+        });
+        
+        // URL process button handler
+        document.getElementById('processUrlBtn').addEventListener('click', function() {
+            const url = document.getElementById('videoUrl').value.trim();
+            if (url) {
+                processVideoUrl(url);
+            } else {
+                alert('Please enter a video URL');
+            }
+        });
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function processVideoFile(file) {
+            const formData = new FormData();
+            formData.append('video_file', file);
+            formData.append('title', file.name.replace(/\.[^/.]+$/, ""));
+            formData.append('location', 'Uploaded Video Analysis');
+            
+            showProgress('Uploading and analyzing video...', 0);
+            
+            fetch('/api/video-analysis/analyze_video/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.analysis_id) {
+                    showProgress('Video uploaded successfully. Starting fire detection analysis...', 25);
+                    pollAnalysisResults(data.analysis_id);
+                } else {
+                    showError('Failed to start video analysis: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to upload video: ' + error.message);
+            });
+        }
+        
+        function processVideoUrl(url) {
+            const data = {
+                video_url: url,
+                title: 'URL Video Analysis',
+                location: 'External Video Source'
+            };
+            
+            showProgress('Starting video analysis from URL...', 0);
+            
+            fetch('/api/video-analysis/analyze_video/', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.analysis_id) {
+                    showProgress('Analysis started successfully. Processing video...', 25);
+                    pollAnalysisResults(data.analysis_id);
+                } else {
+                    showError('Failed to start video analysis: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to process video URL: ' + error.message);
+            });
+        }
+        
+        function pollAnalysisResults(analysisId) {
+            const pollInterval = setInterval(() => {
+                fetch(`/api/video-analysis/${analysisId}/get_results/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.analysis_status === 'completed') {
+                        clearInterval(pollInterval);
+                        showResults(data);
+                    } else if (data.analysis_status === 'failed') {
+                        clearInterval(pollInterval);
+                        showError('Video analysis failed');
+                    } else {
+                        // Still processing
+                        updateProgress(Math.min(75, 25 + Math.random() * 50));
+                    }
+                })
+                .catch(error => {
+                    clearInterval(pollInterval);
+                    showError('Error checking analysis results: ' + error.message);
+                });
+            }, 3000); // Poll every 3 seconds
+        }
+        
+        function showProgress(message, percent) {
+            const modal = document.createElement('div');
+            modal.id = 'progressModal';
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-fire mr-2 text-orange-500"></i>Fire Detection Analysis
+                    </h3>
+                    <p class="text-gray-300 mb-4" id="progressMessage">${message}</p>
+                    <div class="w-full bg-gray-700 rounded-full h-3 mb-4">
+                        <div id="progressBar" class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                    </div>
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+            }
+        }
+        
+        function showResults(data) {
+            // Remove progress modal
+            const progressModal = document.getElementById('progressModal');
+            if (progressModal) progressModal.remove();
+            
+            // Show results modal
+            const resultsModal = document.createElement('div');
+            resultsModal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            
+            const fireDetected = data.fire_detected;
+            const confidence = (data.confidence_score * 100).toFixed(1);
+            
+            resultsModal.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4">
+                    <div class="text-center">
+                        ${fireDetected ? `
+                            <i class="fas fa-fire text-6xl text-red-500 mb-4 animate-pulse"></i>
+                            <h3 class="text-2xl font-bold text-red-500 mb-4">🔥 FIRE DETECTED!</h3>
+                            <div class="bg-red-900 p-4 rounded-lg mb-4">
+                                <p><strong>Video:</strong> ${data.title}</p>
+                                <p><strong>Location:</strong> ${data.location}</p>
+                                <p><strong>Confidence:</strong> ${confidence}%</p>
+                                <p><strong>Detection Time:</strong> ${data.detection_timestamp || 'Multiple frames'}</p>
+                            </div>
+                            <div class="bg-gray-700 p-4 rounded-lg mb-4">
+                                <h4 class="font-semibold mb-2">🚨 Emergency Response Activated:</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>SMS Alerts:</span>
+                                        <span class="text-green-400">${data.sms_sent ? '✅ Sent' : '⏳ Pending'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Emergency Calls:</span>
+                                        <span class="text-green-400">${data.calls_made ? '✅ Initiated' : '⏳ Pending'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Siren System:</span>
+                                        <span class="text-green-400">${data.siren_activated ? '✅ Activated' : '⏳ Pending'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : `
+                            <i class="fas fa-shield-alt text-6xl text-green-500 mb-4"></i>
+                            <h3 class="text-2xl font-bold text-green-500 mb-4">✅ NO FIRE DETECTED</h3>
+                            <div class="bg-green-900 p-4 rounded-lg mb-4">
+                                <p><strong>Video:</strong> ${data.title}</p>
+                                <p><strong>Location:</strong> ${data.location}</p>
+                                <p><strong>Confidence:</strong> ${confidence}%</p>
+                                <p><strong>Status:</strong> Safe</p>
+                            </div>
+                            <p class="text-gray-400">The video has been analyzed and no fire or smoke was detected.</p>
+                        `}
+                    </div>
+                    <div class="flex space-x-4 mt-6">
+                        <button onclick="this.closest('.fixed').remove(); window.location.href='/dashboard/'" class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                            View Dashboard
+                        </button>
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(resultsModal);
+        }
+        
+        function showError(message) {
+            // Remove progress modal if exists
+            const progressModal = document.getElementById('progressModal');
+            if (progressModal) progressModal.remove();
+            
+            alert('Error: ' + message);
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Normal Kitchen Video #1
+# Filename: normal_kitchen_001.mp4
+# Duration: 30 seconds
+# Resolution: 1920x1080
+# Fire Detection: NEGATIVE (Confidence: 5%)
+# Location: Kitchen Area
+# Timestamp: 2025-08-26 09:15:00
+# Emergency Response: NOT TRIGGERED
+# 
+# Description: Normal cooking activity
+# Frame Analysis: No fire detected in any frame
+# Max Confidence: 8% (false positive threshold)
+# 
+# Use this metadata for testing purposes
+# Actual video file would be located here

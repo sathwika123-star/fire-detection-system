@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Fire Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        /* Completely disable zoom and pan on canvas elements */
+        canvas {
+            touch-action: none !important;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            -webkit-touch-callout: none !important;
+            -webkit-user-drag: none !important;
+            -khtml-user-drag: none !important;
+            -moz-user-drag: none !important;
+            -o-user-drag: none !important;
+        }
+        
+        /* Disable zoom on chart containers */
+        .chart-container, .bg-gray-800 {
+            touch-action: none !important;
+            overflow: hidden !important;
+        }
+        
+        /* Disable browser zoom on entire analytics page */
+        body {
+            touch-action: manipulation !important;
+            -ms-touch-action: manipulation !important;
+        }
+        
+        /* Additional zoom prevention */
+        .bg-gray-800 canvas {
+            image-rendering: auto !important;
+            image-rendering: crisp-edges !important;
+            image-rendering: pixelated !important;
+        }
+    </style>>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 flex items-center justify-between border-b border-gray-700">
+        <div class="flex items-center space-x-4">
+            <i class="fas fa-fire text-red-500 text-2xl"></i>
+            <h1 class="text-xl font-semibold">Fire Detection Analytics</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <select id="timeRange" class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2">
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
+            </select>
+            <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                <i class="fas fa-download mr-2"></i>Export Report
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <div class="w-64 bg-gray-800 border-r border-gray-700">
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'index' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-video"></i>
+                            <span>Live Monitoring</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'camera-feeds' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera Feeds</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'incident-history' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-history"></i>
+                            <span>Incident History</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'analytics' %}" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-600 text-white">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'emergency-contacts' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-users"></i>
+                            <span>Emergency Contacts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'reports' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700 text-gray-300">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-auto">
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Total Incidents</p>
+                            <p class="text-3xl font-bold text-red-400">47</p>
+                        </div>
+                        <i class="fas fa-fire text-red-500 text-3xl"></i>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <i class="fas fa-arrow-up text-red-500 mr-1"></i>
+                        <span class="text-red-500">+12% from last month</span>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">False Alarms</p>
+                            <p class="text-3xl font-bold text-yellow-400">8</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-3xl"></i>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <i class="fas fa-arrow-down text-green-500 mr-1"></i>
+                        <span class="text-green-500">-5% from last month</span>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Avg Response Time</p>
+                            <p class="text-3xl font-bold text-green-400">42s</p>
+                        </div>
+                        <i class="fas fa-clock text-green-500 text-3xl"></i>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <i class="fas fa-arrow-down text-green-500 mr-1"></i>
+                        <span class="text-green-500">-8s from last month</span>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">System Uptime</p>
+                            <p class="text-3xl font-bold text-blue-400">99.8%</p>
+                        </div>
+                        <i class="fas fa-server text-blue-500 text-3xl"></i>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <i class="fas fa-arrow-up text-green-500 mr-1"></i>
+                        <span class="text-green-500">+0.2% from last month</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Performance Metrics -->
+            <div class="bg-gray-800 p-6 rounded-lg mb-8">
+                <h3 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fas fa-brain text-purple-500 mr-2"></i>
+                    AI Model Performance Metrics
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-gray-700 p-4 rounded text-center">
+                        <p class="text-gray-400 text-sm">Model Accuracy</p>
+                        <p class="text-2xl font-bold text-green-400" id="model-accuracy">94.2%</p>
+                        <p class="text-xs text-gray-500 mt-1">Overall detection accuracy</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded text-center">
+                        <p class="text-gray-400 text-sm">Precision</p>
+                        <p class="text-2xl font-bold text-blue-400" id="precision">92.1%</p>
+                        <p class="text-xs text-gray-500 mt-1">True positive rate</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded text-center">
+                        <p class="text-gray-400 text-sm">Recall</p>
+                        <p class="text-2xl font-bold text-purple-400" id="recall">88.7%</p>
+                        <p class="text-xs text-gray-500 mt-1">Sensitivity score</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded text-center">
+                        <p class="text-gray-400 text-sm">F1-Score</p>
+                        <p class="text-2xl font-bold text-cyan-400" id="f1-score">90.3%</p>
+                        <p class="text-xs text-gray-500 mt-1">Harmonic mean</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-gray-700 p-4 rounded text-center">
+                        <p class="text-gray-400 text-sm">Avg Confidence</p>
+                        <p class="text-xl font-bold text-yellow-400" id="avg-confidence">87.5%</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded text-center">
+                        <p class="text-gray-400 text-sm">Processing Time</p>
+                        <p class="text-xl font-bold text-orange-400" id="processing-time">125ms</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded text-center">
+                        <p class="text-gray-400 text-sm">Total Detections</p>
+                        <p class="text-xl font-bold text-red-400" id="total-detections">1,247</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Incidents Timeline -->
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Incidents Over Time</h3>
+                    <canvas id="incidentsChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- Detection Accuracy -->
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Detection Accuracy</h3>
+                    <canvas id="accuracyChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Location Heatmap -->
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Incidents by Location</h3>
+                    <canvas id="locationChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- Response Time Trends -->
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Response Time Trends</h3>
+                    <canvas id="responseChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Row 3 - Performance Metrics -->
+            <div class="grid grid-cols-1 gap-6 mb-8">
+                <!-- AI Model Performance Metrics Chart -->
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-chart-line text-purple-500 mr-2"></i>
+                        AI Model Performance Metrics Over Time
+                    </h3>
+                    <canvas id="performanceMetricsChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Detailed Analytics Table -->
+            <div class="bg-gray-800 rounded-lg">
+                <div class="p-6 border-b border-gray-700">
+                    <h3 class="text-lg font-semibold">Performance Analytics</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Metric</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Current</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Previous</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Change</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-gray-800 divide-y divide-gray-700">
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-300">Fire Detection Rate</td>
+                                <td class="px-6 py-4 text-sm text-green-400">98.2%</td>
+                                <td class="px-6 py-4 text-sm text-gray-300">97.8%</td>
+                                <td class="px-6 py-4 text-sm text-green-400">+0.4%</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <i class="fas fa-arrow-up text-green-500"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-300">False Positive Rate</td>
+                                <td class="px-6 py-4 text-sm text-yellow-400">17.0%</td>
+                                <td class="px-6 py-4 text-sm text-gray-300">22.1%</td>
+                                <td class="px-6 py-4 text-sm text-green-400">-5.1%</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <i class="fas fa-arrow-down text-green-500"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-300">Average Confidence Score</td>
+                                <td class="px-6 py-4 text-sm text-blue-400">87.3%</td>
+                                <td class="px-6 py-4 text-sm text-gray-300">84.9%</td>
+                                <td class="px-6 py-4 text-sm text-green-400">+2.4%</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <i class="fas fa-arrow-up text-green-500"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-300">People Detection Accuracy</td>
+                                <td class="px-6 py-4 text-sm text-green-400">94.7%</td>
+                                <td class="px-6 py-4 text-sm text-gray-300">92.3%</td>
+                                <td class="px-6 py-4 text-sm text-green-400">+2.4%</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <i class="fas fa-arrow-up text-green-500"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Chart.js defaults to allow rendering but disable zoom
+        Chart.defaults.interaction = {
+            intersect: false,
+            mode: 'index'
+        };
+        
+        // Global zoom prevention for all Chart.js instances
+        Chart.defaults.plugins = Chart.defaults.plugins || {};
+        Chart.defaults.plugins.zoom = {
+            zoom: {
+                enabled: false,
+                wheel: {
+                    enabled: false
+                },
+                pinch: {
+                    enabled: false
+                },
+                drag: {
+                    enabled: false
+                }
+            },
+            pan: {
+                enabled: false
+            }
+        };
+
+        // Simple zoom prevention function
+        function addZoomPrevention() {
+            setTimeout(() => {
+                const canvases = document.querySelectorAll('canvas');
+                canvases.forEach(canvas => {
+                    canvas.addEventListener('wheel', (e) => {
+                        e.preventDefault();
+                        return false;
+                    }, { passive: false });
+                    
+                    canvas.addEventListener('touchstart', (e) => {
+                        if (e.touches.length > 1) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }, { passive: false });
+                });
+                console.log('Zoom prevention applied to', canvases.length, 'canvases');
+            }, 1000);
+        }
+
+        // Simple function to disable zoom on canvas after creation
+        function disableCanvasZoom(canvas) {
+            if (canvas) {
+                canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }, { passive: false });
+                
+                canvas.addEventListener('touchstart', (e) => {
+                    if (e.touches.length > 1) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                }, { passive: false });
+                
+                canvas.addEventListener('touchmove', (e) => {
+                    if (e.touches.length > 1) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                }, { passive: false });
+            }
+        }
+        
+        class AnalyticsManager {
+            constructor() {
+                this.charts = {};
+                this.init();
+            }
+
+            init() {
+                this.initializeCharts();
+                this.bindEvents();
+                this.preventZooming();
+                this.loadPerformanceMetrics(); // Load performance metrics on init
+                console.log('Analytics Manager initialized with charts and metrics');
+            }
+
+            bindEvents() {
+                document.getElementById('timeRange').addEventListener('change', (e) => {
+                    this.updateChartsForTimeRange(e.target.value);
+                });
+            }
+
+            preventZooming() {
+                // Call the zoom prevention function
+                addZoomPrevention();
+            }
+
+            initializeCharts() {
+                console.log('Initializing charts...');
+                
+                // Check if Chart.js is loaded
+                if (typeof Chart === 'undefined') {
+                    console.error('Chart.js is not loaded!');
+                    return;
+                }
+                
+                // Incidents Over Time Chart
+                const incidentsCanvas = document.getElementById('incidentsChart');
+                if (!incidentsCanvas) {
+                    console.error('incidentsChart canvas not found!');
+                    return;
+                }
+                
+                const incidentsCtx = incidentsCanvas.getContext('2d');
+                this.charts.incidents = new Chart(incidentsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mall Inside', 'Mart Area', 'Mall Escalator', 'Mall First Floor', 'Mall Front Entrance', 'Mall Total Area'],
+                        datasets: [{
+                            label: 'Fire Incidents',
+                            data: [2, 1, 0, 0, 0, 0], // Fire incidents per location based on your videos
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4
+                        }, {
+                            label: 'False Alarms',
+                            data: [0, 0, 0, 0, 0, 0], // No false alarms in your videos
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#d1d5db'
+                                }
+                            },
+                            zoom: {
+                                zoom: {
+                                    enabled: false,
+                                    wheel: { enabled: false },
+                                    pinch: { enabled: false },
+                                    drag: { enabled: false }
+                                },
+                                pan: {
+                                    enabled: false,
+                                    threshold: 0
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#9ca3af' },
+                                grid: { color: '#374151' }
+                            },
+                            y: {
+                                ticks: { color: '#9ca3af' },
+                                grid: { color: '#374151' }
+                            }
+                        },
+                        events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove']
+                    }
+                });
+
+                // Detection Accuracy Chart
+                const accuracyCanvas = document.getElementById('accuracyChart');
+                if (!accuracyCanvas) {
+                    console.error('accuracyChart canvas not found!');
+                    return;
+                }
+                
+                const accuracyCtx = accuracyCanvas.getContext('2d');
+                this.charts.accuracy = new Chart(accuracyCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['True Positives', 'False Positives', 'True Negatives'],
+                        datasets: [{
+                            data: [82, 18, 95],
+                            backgroundColor: ['#10b981', '#ef4444', '#3b82f6'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'nearest'
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#d1d5db',
+                                    padding: 20
+                                }
+                            },
+                            zoom: {
+                                zoom: {
+                                    enabled: false
+                                },
+                                pan: {
+                                    enabled: false
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Location Chart
+                const locationCanvas = document.getElementById('locationChart');
+                if (!locationCanvas) {
+                    console.error('locationChart canvas not found!');
+                    return;
+                }
+                
+                const locationCtx = locationCanvas.getContext('2d');
+                this.charts.location = new Chart(locationCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mall Inside', 'Mart Area', 'Mall Escalator', 'Mall First Floor', 'Mall Front Entrance', 'Mall Total Area'],
+                        datasets: [{
+                            label: 'Incidents',
+                            data: [2, 1, 0, 0, 0, 0], // Updated to match your videos: 2 fire areas, 4 safe areas
+                            backgroundColor: [
+                                '#ef4444', // Red for Mall Inside (Fire)
+                                '#f59e0b', // Orange for Mart Area (Fire)
+                                '#10b981', // Green for Mall Escalator (Safe)
+                                '#3b82f6', // Blue for Mall First Floor (Safe)
+                                '#8b5cf6', // Purple for Mall Front Entrance (Safe)
+                                '#06b6d4'  // Cyan for Mall Total Area (Safe)
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            zoom: {
+                                zoom: {
+                                    enabled: false
+                                },
+                                pan: {
+                                    enabled: false
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#9ca3af' },
+                                grid: { color: '#374151' }
+                            },
+                            y: {
+                                ticks: { color: '#9ca3af' },
+                                grid: { color: '#374151' }
+                            }
+                        }
+                    }
+                });
+
+                // Response Time Chart
+                const responseCanvas = document.getElementById('responseChart');
+                if (!responseCanvas) {
+                    console.error('responseChart canvas not found!');
+                    return;
+                }
+                
+                const responseCtx = responseCanvas.getContext('2d');
+                this.charts.response = new Chart(responseCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Response Time (seconds)',
+                            data: [65, 52, 48, 42, 38, 42],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#d1d5db'
+                                }
+                            },
+                            zoom: {
+                                zoom: {
+                                    enabled: false
+                                },
+                                pan: {
+                                    enabled: false
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#9ca3af' },
+                                grid: { color: '#374151' }
+                            },
+                            y: {
+                                ticks: { color: '#9ca3af' },
+                                grid: { color: '#374151' }
+                            }
+                        }
+                    }
+                });
+
+                // Performance Metrics Chart
+                const performanceCanvas = document.getElementById('performanceMetricsChart');
+                if (!performanceCanvas) {
+                    console.error('performanceMetricsChart canvas not found!');
+                    return;
+                }
+                
+                const performanceCtx = performanceCanvas.getContext('2d');
+                this.charts.performance = new Chart(performanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                        datasets: [{
+                            label: 'Accuracy (%)',
+                            data: [92.1, 93.2, 94.1, 94.2, 93.8, 94.5, 94.2, 94.7, 94.2],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: false
+                        }, {
+                            label: 'Precision (%)',
+                            data: [90.5, 91.2, 91.8, 92.1, 91.9, 92.3, 92.1, 92.6, 92.1],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: false
+                        }, {
+                            label: 'Recall (%)',
+                            data: [87.2, 88.1, 88.5, 88.7, 88.3, 89.1, 88.7, 89.3, 88.7],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.4,
+                            fill: false
+                        }, {
+                            label: 'F1-Score (%)',
+                            data: [88.8, 89.6, 90.1, 90.3, 90.0, 90.6, 90.3, 90.9, 90.3],
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            tension: 0.4,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: '#d1d5db',
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            },
+                            zoom: {
+                                zoom: {
+                                    enabled: false
+                                },
+                                pan: {
+                                    enabled: false
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                                titleColor: '#f9fafb',
+                                bodyColor: '#f9fafb',
+                                borderColor: '#374151',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Time Period',
+                                    color: '#d1d5db'
+                                },
+                                ticks: { 
+                                    color: '#9ca3af'
+                                },
+                                grid: { 
+                                    color: '#374151'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Performance (%)',
+                                    color: '#d1d5db'
+                                },
+                                min: 80,
+                                max: 100,
+                                ticks: { 
+                                    color: '#9ca3af',
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: { 
+                                    color: '#374151'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('All charts initialized successfully!');
+                
+                // Apply zoom prevention after charts are created
+                addZoomPrevention();
+            }
+
+            updateChartsForTimeRange(timeRange) {
+                // Update chart data based on selected time range
+                const incidentsData = {
+                    '24h': {
+                        labels: ['Mall Inside', 'Mart Area', 'Mall Escalator', 'Mall First Floor', 'Mall Front Entrance', 'Mall Total Area'],
+                        incidents: [1, 1, 0, 0, 0, 0], // Recent incidents by location based on your videos
+                        alarms: [0, 0, 0, 0, 0, 0] // No false alarms in your videos
+                    },
+                    '7d': {
+                        labels: ['Mall Inside', 'Mart Area', 'Mall Escalator', 'Mall First Floor', 'Mall Front Entrance', 'Mall Total Area'],
+                        incidents: [2, 1, 0, 0, 0, 0],
+                        alarms: [0, 0, 0, 0, 0, 0]
+                    },
+                    '30d': {
+                        labels: ['Mall Inside', 'Mart Area', 'Mall Escalator', 'Mall First Floor', 'Mall Front Entrance', 'Mall Total Area'],
+                        incidents: [2, 1, 0, 0, 0, 0],
+                        alarms: [0, 0, 0, 0, 0, 0]
+                    },
+                    '90d': {
+                        labels: ['Mall Inside', 'Mart Area', 'Mall Escalator', 'Mall First Floor', 'Mall Front Entrance', 'Mall Total Area'],
+                        incidents: [2, 1, 0, 0, 0, 0],
+                        alarms: [0, 0, 0, 0, 0, 0]
+                    }
+                    }
+                };
+
+                // Performance metrics data for different time ranges
+                const performanceData = {
+                    '24h': {
+                        labels: ['00:00', '06:00', '12:00', '18:00'],
+                        accuracy: [94.1, 94.3, 94.2, 94.2],
+                        precision: [92.0, 92.2, 92.1, 92.1],
+                        recall: [88.6, 88.8, 88.7, 88.7],
+                        f1score: [90.2, 90.4, 90.3, 90.3]
+                    },
+                    '7d': {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        accuracy: [94.0, 94.1, 94.3, 94.2, 94.4, 94.2, 94.2],
+                        precision: [91.8, 91.9, 92.2, 92.1, 92.3, 92.1, 92.1],
+                        recall: [88.5, 88.6, 88.9, 88.7, 88.9, 88.7, 88.7],
+                        f1score: [90.1, 90.2, 90.5, 90.3, 90.5, 90.3, 90.3]
+                    },
+                    '30d': {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        accuracy: [93.8, 94.0, 94.3, 94.2],
+                        precision: [91.5, 91.8, 92.2, 92.1],
+                        recall: [88.2, 88.5, 88.9, 88.7],
+                        f1score: [89.8, 90.1, 90.5, 90.3]
+                    },
+                    '90d': {
+                        labels: ['Month 1', 'Month 2', 'Month 3'],
+                        accuracy: [93.5, 93.9, 94.2],
+                        precision: [91.2, 91.6, 92.1],
+                        recall: [87.8, 88.3, 88.7],
+                        f1score: [89.4, 89.9, 90.3]
+                    }
+                };
+
+                const data = incidentsData[timeRange];
+                this.charts.incidents.data.labels = data.labels;
+                this.charts.incidents.data.datasets[0].data = data.incidents;
+                this.charts.incidents.data.datasets[1].data = data.alarms;
+                this.charts.incidents.update();
+
+                // Update performance metrics chart
+                const perfData = performanceData[timeRange];
+                if (this.charts.performance && perfData) {
+                    this.charts.performance.data.labels = perfData.labels;
+                    this.charts.performance.data.datasets[0].data = perfData.accuracy;
+                    this.charts.performance.data.datasets[1].data = perfData.precision;
+                    this.charts.performance.data.datasets[2].data = perfData.recall;
+                    this.charts.performance.data.datasets[3].data = perfData.f1score;
+                    this.charts.performance.update();
+                }
+
+                // Update location chart data based on time range (video-based incidents)
+                const locationIncidents = {
+                    '24h': [4, 2, 0, 0, 0], // Recent incidents mainly in fire-prone areas
+                    '7d': [12, 6, 1, 0, 1],
+                    '30d': [15, 8, 2, 1, 1],
+                    '90d': [18, 10, 3, 2, 2]
+                };
+                
+                if (this.charts.location && locationIncidents[timeRange]) {
+                    this.charts.location.data.datasets[0].data = locationIncidents[timeRange];
+                    this.charts.location.update();
+                }
+
+                // Show notification
+                this.showNotification(`Analytics updated for ${timeRange}`, 'info');
+            }
+
+            async loadPerformanceMetrics() {
+                try {
+                    const response = await fetch('/api/fire-detection/performance_metrics/');
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.updatePerformanceDisplay(data);
+                    } else {
+                        console.error('Failed to load performance metrics');
+                        this.showNotification('Failed to load performance metrics', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error loading performance metrics:', error);
+                    this.showNotification('Error loading performance metrics', 'error');
+                }
+            }
+
+            updatePerformanceDisplay(data) {
+                const { ai_model_metrics, system_metrics } = data;
+                
+                // Update AI model metrics
+                if (ai_model_metrics) {
+                    document.getElementById('model-accuracy').textContent = `${ai_model_metrics.accuracy}%`;
+                    document.getElementById('precision').textContent = `${ai_model_metrics.precision}%`;
+                    document.getElementById('recall').textContent = `${ai_model_metrics.recall}%`;
+                    document.getElementById('f1-score').textContent = `${ai_model_metrics.f1_score}%`;
+                    document.getElementById('avg-confidence').textContent = `${ai_model_metrics.average_confidence}%`;
+                    document.getElementById('processing-time').textContent = `${ai_model_metrics.average_processing_time}ms`;
+                    document.getElementById('total-detections').textContent = ai_model_metrics.total_detections.toLocaleString();
+                }
+                
+                // Update system metrics in main dashboard cards
+                if (system_metrics) {
+                    // You can update other elements here if needed
+                    console.log('System metrics updated:', system_metrics);
+                }
+                
+                // Set up auto-refresh every 30 seconds
+                setTimeout(() => this.loadPerformanceMetrics(), 30000);
+            }
+
+            showNotification(message, type) {
+                const notification = document.createElement('div');
+                const colors = {
+                    success: 'bg-green-600',
+                    warning: 'bg-yellow-600',
+                    error: 'bg-red-600',
+                    info: 'bg-blue-600'
+                };
+                
+                notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // Initialize Analytics
+        document.addEventListener('DOMContentLoaded', () => {
+            window.analyticsManager = new AnalyticsManager();
+        });
+    </script>
+</body>
+</html>
