@@ -4,8 +4,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 
 def generate_uuid():
-    """Generate UUID as string for primary key"""
-    return str(uuid.uuid4())
+    """Generate UUID as string without hyphens for primary key (fits in 32 chars)"""
+    return str(uuid.uuid4()).replace('-', '')
 
 class Camera(models.Model):
     STATUS_CHOICES = [
@@ -20,7 +20,7 @@ class Camera(models.Model):
         ('4K', '4K'),
     ]
     
-    id = models.CharField(max_length=100, primary_key=True, default=uuid.uuid4)
+    id = models.CharField(max_length=100, primary_key=True, default=generate_uuid)
     name = models.CharField(max_length=100, unique=True)
     location = models.CharField(max_length=200)
     rtsp_url = models.TextField()
@@ -59,7 +59,7 @@ class FireDetectionEvent(models.Model):
         ('false_alarm', 'False Alarm'),
     ]
     
-    id = models.CharField(max_length=100, primary_key=True, default=uuid.uuid4)
+    id = models.CharField(max_length=100, primary_key=True, default=generate_uuid)
     camera = models.ForeignKey(Camera, on_delete=models.CASCADE, db_column='camera_id')
     detection_type = models.CharField(max_length=20, choices=DETECTION_TYPE_CHOICES, default='fire')
     confidence_score = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
@@ -180,3 +180,4 @@ class SystemPerformanceMetrics(models.Model):
     class Meta:
         db_table = 'system_performance_metrics'
         ordering = ['-measurement_time']
+

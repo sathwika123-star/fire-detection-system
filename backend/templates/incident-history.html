@@ -6,6 +6,7 @@
     <title>Incident History - Fire Detection System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
@@ -75,6 +76,81 @@
 
         <!-- Main Content -->
         <div class="flex-1 p-6 overflow-auto">
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Total Incidents</p>
+                            <p id="totalIncidentsCard" class="text-2xl font-bold text-red-400">6</p>
+                        </div>
+                        <i class="fas fa-fire text-red-500 text-3xl"></i>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Fire Incidents</p>
+                            <p id="fireIncidentsCard" class="text-2xl font-bold text-orange-400">2</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle text-orange-500 text-3xl"></i>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">False Alarms</p>
+                            <p id="falseAlarmsCard" class="text-2xl font-bold text-yellow-400">1</p>
+                        </div>
+                        <i class="fas fa-bell-slash text-yellow-500 text-3xl"></i>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Safe Status</p>
+                            <p id="safeStatusCard" class="text-2xl font-bold text-green-400">3</p>
+                        </div>
+                        <i class="fas fa-check-circle text-green-500 text-3xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Incidents by Location Chart -->
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Incidents by Location</h3>
+                    <div class="h-64">
+                        <canvas id="locationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Incidents Timeline Chart -->
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Incidents Timeline</h3>
+                    <div class="h-64">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Severity Distribution Chart -->
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Severity Distribution</h3>
+                    <div class="h-64">
+                        <canvas id="severityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Status Distribution Chart -->
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-4">Status Overview</h3>
+                    <div class="h-64">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <!-- Filters -->
             <div class="bg-gray-800 p-4 rounded-lg mb-6">
                 <h3 class="text-lg font-semibold mb-4">Filter Incidents</h3>
@@ -255,14 +331,261 @@
                 this.currentPage = 1;
                 this.itemsPerPage = 10;
                 this.filteredIncidents = [...this.incidents];
+                this.charts = {};
                 
                 this.init();
             }
 
             init() {
+                this.initializeCharts();
+                this.updateStatistics();
                 this.renderTable();
                 this.bindEvents();
                 this.updatePagination();
+            }
+
+            initializeCharts() {
+                // Location Chart - Bar Chart
+                const locationCtx = document.getElementById('locationChart').getContext('2d');
+                this.charts.location = new Chart(locationCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mall Inside', 'Mart Area', 'Escalator', 'First Floor', 'Front', 'Total Area'],
+                        datasets: [{
+                            label: 'Incidents',
+                            data: [1, 1, 1, 1, 1, 1],
+                            backgroundColor: [
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(251, 146, 60, 0.8)',
+                                'rgba(234, 179, 8, 0.8)',
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(168, 85, 247, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(239, 68, 68, 1)',
+                                'rgba(251, 146, 60, 1)',
+                                'rgba(234, 179, 8, 1)',
+                                'rgba(34, 197, 94, 1)',
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(168, 85, 247, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#9CA3AF',
+                                    stepSize: 1
+                                },
+                                grid: {
+                                    color: 'rgba(75, 85, 99, 0.3)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#9CA3AF'
+                                },
+                                grid: {
+                                    color: 'rgba(75, 85, 99, 0.3)'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Timeline Chart - Line Chart
+                const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+                this.charts.timeline = new Chart(timelineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                        datasets: [{
+                            label: 'Incidents Over Time',
+                            data: [0, 0, 0, 1, 3, 2],
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: {
+                                    color: '#9CA3AF'
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#9CA3AF',
+                                    stepSize: 1
+                                },
+                                grid: {
+                                    color: 'rgba(75, 85, 99, 0.3)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#9CA3AF'
+                                },
+                                grid: {
+                                    color: 'rgba(75, 85, 99, 0.3)'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Severity Chart - Doughnut Chart
+                const severityCtx = document.getElementById('severityChart').getContext('2d');
+                this.charts.severity = new Chart(severityCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['High (80%+)', 'Medium (50-80%)', 'Low (<50%)'],
+                        datasets: [{
+                            data: [2, 0, 4],
+                            backgroundColor: [
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(251, 146, 60, 0.8)',
+                                'rgba(34, 197, 94, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(239, 68, 68, 1)',
+                                'rgba(251, 146, 60, 1)',
+                                'rgba(34, 197, 94, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#9CA3AF',
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Status Chart - Pie Chart
+                const statusCtx = document.getElementById('statusChart').getContext('2d');
+                this.charts.status = new Chart(statusCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Resolved', 'False Alarm', 'Safe'],
+                        datasets: [{
+                            data: [2, 1, 3],
+                            backgroundColor: [
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(234, 179, 8, 0.8)',
+                                'rgba(34, 197, 94, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(239, 68, 68, 1)',
+                                'rgba(234, 179, 8, 1)',
+                                'rgba(34, 197, 94, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#9CA3AF',
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateStatistics() {
+                const total = this.filteredIncidents.length;
+                const resolved = this.filteredIncidents.filter(i => i.status === 'resolved').length;
+                const falseAlarms = this.filteredIncidents.filter(i => i.status === 'false-alarm').length;
+                const safe = this.filteredIncidents.filter(i => i.status === 'safe').length;
+
+                document.getElementById('totalIncidentsCard').textContent = total;
+                document.getElementById('fireIncidentsCard').textContent = resolved;
+                document.getElementById('falseAlarmsCard').textContent = falseAlarms;
+                document.getElementById('safeStatusCard').textContent = safe;
+            }
+
+            updateCharts() {
+                // Update location chart
+                const locationCounts = {
+                    'Mall Inside': 0,
+                    'Mart Area': 0,
+                    'Mall Escalator': 0,
+                    'Mall First Floor': 0,
+                    'Mall Front Entrance': 0,
+                    'Mall Total Area': 0
+                };
+
+                this.filteredIncidents.forEach(incident => {
+                    if (locationCounts.hasOwnProperty(incident.location)) {
+                        locationCounts[incident.location]++;
+                    }
+                });
+
+                this.charts.location.data.datasets[0].data = Object.values(locationCounts);
+                this.charts.location.update();
+
+                // Update severity chart
+                const highSeverity = this.filteredIncidents.filter(i => i.severity >= 80).length;
+                const mediumSeverity = this.filteredIncidents.filter(i => i.severity >= 50 && i.severity < 80).length;
+                const lowSeverity = this.filteredIncidents.filter(i => i.severity < 50).length;
+
+                this.charts.severity.data.datasets[0].data = [highSeverity, mediumSeverity, lowSeverity];
+                this.charts.severity.update();
+
+                // Update status chart
+                const resolved = this.filteredIncidents.filter(i => i.status === 'resolved').length;
+                const falseAlarms = this.filteredIncidents.filter(i => i.status === 'false-alarm').length;
+                const safe = this.filteredIncidents.filter(i => i.status === 'safe').length;
+
+                this.charts.status.data.datasets[0].data = [resolved, falseAlarms, safe];
+                this.charts.status.update();
+
+                // Update timeline chart (simplified - group by time periods)
+                const timeGroups = [0, 0, 0, 0, 0, 0];
+                this.filteredIncidents.forEach(incident => {
+                    const hour = parseInt(incident.datetime.split(' ')[1].split(':')[0]);
+                    const timeIndex = Math.floor(hour / 4);
+                    if (timeIndex >= 0 && timeIndex < 6) {
+                        timeGroups[timeIndex]++;
+                    }
+                });
+
+                this.charts.timeline.data.datasets[0].data = timeGroups;
+                this.charts.timeline.update();
             }
 
             bindEvents() {
@@ -385,6 +708,8 @@
                 });
 
                 this.currentPage = 1;
+                this.updateStatistics();
+                this.updateCharts();
                 this.renderTable();
             }
 
@@ -423,13 +748,13 @@
                         </div>
                     </div>
                     <div class="mt-6 flex space-x-4">
-                        <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
+                        <button onclick="downloadSnapshotFromModal(${incident.id})" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-download mr-2"></i>Download Snapshot
                         </button>
-                        <button class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg">
+                        <button onclick="generateReportFromModal(${incident.id})" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-file-pdf mr-2"></i>Generate Report
                         </button>
-                        <button class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg">
+                        <button onclick="shareIncident(${incident.id})" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-share mr-2"></i>Share
                         </button>
                     </div>
@@ -507,7 +832,7 @@
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
                 button.disabled = true;
                 
-                // Create download link for incident snapshot - Fixed URL path
+                // Create download link for incident snapshot
                 const downloadUrl = `/api/download-snapshot/${id}/`;
                 
                 // Create temporary anchor element for download
@@ -534,6 +859,39 @@
             } catch (error) {
                 console.error('Download error:', error);
                 showToast('Download failed. Please try again.', 'error');
+                if (button) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+        }
+
+        function downloadSnapshotFromModal(id) {
+            try {
+                // Show loading feedback
+                showToast('Preparing snapshot download...', 'info');
+                
+                // Create download link for incident snapshot
+                const downloadUrl = `/api/download-snapshot/${id}/`;
+                
+                // Create temporary anchor element for download
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `incident_${id}_snapshot.jpg`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Show success message
+                setTimeout(() => {
+                    showToast('Snapshot download started!', 'success');
+                }, 500);
+                
+                console.log(`Downloading snapshot for incident ${id}`);
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Download failed. Please try again.', 'error');
             }
         }
 
@@ -545,7 +903,7 @@
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
                 button.disabled = true;
                 
-                // Create download link for incident report - Fixed URL path
+                // Create download link for incident report
                 const reportUrl = `/api/generate-report/${id}/`;
                 
                 // Create temporary anchor element for download
@@ -572,7 +930,170 @@
             } catch (error) {
                 console.error('Report generation error:', error);
                 showToast('Report generation failed. Please try again.', 'error');
+                if (button) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
             }
+        }
+
+        function generateReportFromModal(id) {
+            try {
+                // Show loading feedback
+                showToast('Generating incident report...', 'info');
+                
+                // Create download link for incident report
+                const reportUrl = `/api/generate-report/${id}/`;
+                
+                // Create temporary anchor element for download
+                const link = document.createElement('a');
+                link.href = reportUrl;
+                link.download = `fire_incident_report_${id}.txt`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Show success message
+                setTimeout(() => {
+                    showToast('Report generated and download started!', 'success');
+                }, 500);
+                
+                console.log(`Generating report for incident ${id}`);
+            } catch (error) {
+                console.error('Report generation error:', error);
+                showToast('Report generation failed. Please try again.', 'error');
+            }
+        }
+
+        function shareIncident(id) {
+            try {
+                const incident = window.incidentManager.incidents.find(i => i.id === id);
+                if (!incident) {
+                    showToast('Incident not found', 'error');
+                    return;
+                }
+                
+                // Prepare share data
+                const shareText = `Fire Incident Alert - ID: ${id}
+Location: ${incident.location}
+Severity: ${incident.severity}%
+Status: ${incident.status.toUpperCase()}
+Time: ${incident.datetime}
+Description: ${incident.description}`;
+                
+                const shareUrl = window.location.href;
+                
+                // Check if Web Share API is available
+                if (navigator.share) {
+                    navigator.share({
+                        title: `Fire Incident #${id}`,
+                        text: shareText,
+                        url: shareUrl
+                    })
+                    .then(() => {
+                        showToast('Incident shared successfully!', 'success');
+                    })
+                    .catch((error) => {
+                        if (error.name !== 'AbortError') {
+                            console.error('Share failed:', error);
+                            fallbackShare(shareText, id);
+                        }
+                    });
+                } else {
+                    // Fallback for browsers that don't support Web Share API
+                    fallbackShare(shareText, id);
+                }
+            } catch (error) {
+                console.error('Share error:', error);
+                showToast('Share failed. Please try again.', 'error');
+            }
+        }
+
+        function fallbackShare(shareText, id) {
+            // Create a modal with share options
+            const shareModal = document.createElement('div');
+            shareModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            shareModal.innerHTML = `
+                <div class="bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-white">Share Incident #${id}</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="mb-4">
+                        <textarea id="shareText" readonly class="w-full bg-gray-700 text-gray-300 p-3 rounded-lg text-sm" rows="8">${shareText}</textarea>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="copyToClipboard('${id}')" class="flex-1 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-copy mr-2"></i>Copy to Clipboard
+                        </button>
+                        <button onclick="emailIncident('${id}')" class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-envelope mr-2"></i>Email
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(shareModal);
+        }
+
+        function copyToClipboard(id) {
+            const textarea = document.getElementById('shareText');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // For mobile devices
+            
+            try {
+                document.execCommand('copy');
+                showToast('Copied to clipboard!', 'success');
+                // Close share modal
+                setTimeout(() => {
+                    document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50').remove();
+                }, 1000);
+            } catch (error) {
+                // Fallback for modern browsers
+                navigator.clipboard.writeText(textarea.value)
+                    .then(() => {
+                        showToast('Copied to clipboard!', 'success');
+                        setTimeout(() => {
+                            document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50').remove();
+                        }, 1000);
+                    })
+                    .catch(() => {
+                        showToast('Failed to copy. Please try again.', 'error');
+                    });
+            }
+        }
+
+        function emailIncident(id) {
+            const incident = window.incidentManager.incidents.find(i => i.id === id);
+            if (!incident) return;
+            
+            const subject = encodeURIComponent(`Fire Incident Alert - ID: ${id}`);
+            const body = encodeURIComponent(`Fire Incident Report
+            
+Location: ${incident.location}
+Severity: ${incident.severity}%
+Status: ${incident.status.toUpperCase()}
+Time: ${incident.datetime}
+People Affected: ${incident.people}
+Response Time: ${incident.responseTime}
+
+Description: ${incident.description}
+
+Actions Taken:
+${incident.actions.map(action => `- ${action}`).join('\n')}
+
+This is an automated alert from the Fire Detection System.
+`);
+            
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            
+            // Close share modal
+            setTimeout(() => {
+                const modal = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-50');
+                if (modal) modal.remove();
+            }, 500);
         }
         
         function showToast(message, type = 'info') {

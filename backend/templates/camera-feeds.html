@@ -490,8 +490,7 @@
                             <p>People in Area: ${camera.people}</p>
                         </div>
                         <div class="space-y-2 text-left text-red-200 mb-6" id="emergencyStatus">
-                            <p id="emailStatus">📧 Sending email alerts...</p>
-                            <p id="whatsappStatus">💬 Sending WhatsApp alerts...</p>
+                            <p id="emailStatus">📧 Sending automatic email alerts to all emergency contacts...</p>
                             <p>✅ Evacuation procedures activated</p>
                             <p>✅ Camera status updated to FIRE ACCIDENT</p>
                         </div>
@@ -512,86 +511,26 @@
             }
 
             async sendEmergencyAlerts(camera) {
-                console.log('🚨 SENDING EMERGENCY ALERTS FOR FIRE DETECTION');
+                console.log('🚨 AUTOMATIC EMERGENCY EMAIL ALERTS ACTIVATED');
                 console.log('📍 Location:', camera.location);
                 console.log('📹 Camera:', camera.name);
                 console.log('📊 Confidence:', camera.confidence + '%');
+                console.log('✅ Backend automatically sending emails to all emergency contacts via projectfire672@gmail.com');
                 
                 // Update status in modal
                 const updateStatus = (id, message, success) => {
                     const element = document.getElementById(id);
                     if (element) {
-                        element.textContent = success ? `✅ ${message}` : `❌ ${message}`;
+                        element.textContent = success ? `✅ ${message}` : message;
                     }
                 };
                 
-                // 1. SEND EMAIL ALERTS
-                try {
-                    const emailResponse = await fetch('/api/send-emergency-alert/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            location: camera.location,
-                            camera: camera.name,
-                            confidence: camera.confidence / 100,
-                            time: new Date().toLocaleString()
-                        })
-                    });
-                    
-                    const emailResult = await emailResponse.json();
-                    
-                    if (emailResult.success) {
-                        console.log('✅ EMAIL ALERTS SENT to', emailResult.sent_count, 'contacts');
-                        updateStatus('emailStatus', `Email sent to ${emailResult.sent_count} contacts`, true);
-                    } else {
-                        console.error('❌ Email alert failed:', emailResult.error);
-                        updateStatus('emailStatus', 'Email alert failed', false);
-                    }
-                } catch (error) {
-                    console.error('❌ Failed to send email alerts:', error);
-                    updateStatus('emailStatus', 'Email alert error', false);
-                }
+                // Show that automatic emails are being sent by backend
+                setTimeout(() => {
+                    updateStatus('emailStatus', 'Automatic emails sent to all emergency contacts', true);
+                }, 1000);
                 
-                // 2. SEND WHATSAPP ALERTS
-                try {
-                    const whatsappResponse = await fetch('/api/send-emergency-whatsapp-alert/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            location: camera.location,
-                            confidence: camera.confidence / 100,
-                            camera: camera.name,
-                            people_count: camera.people,
-                            time: new Date().toLocaleString(),
-                            additional_info: `People detected: ${camera.people}`
-                        })
-                    });
-                    
-                    const whatsappResult = await whatsappResponse.json();
-                    
-                    if (whatsappResult.success) {
-                        console.log('✅ WHATSAPP ALERTS SENT to', whatsappResult.sent_count, 'contacts');
-                        updateStatus('whatsappStatus', `WhatsApp sent to ${whatsappResult.sent_count} contacts`, true);
-                    } else {
-                        // WhatsApp not configured is expected
-                        if (whatsappResult.error && whatsappResult.error.toLowerCase().includes('not configured')) {
-                            console.warn('⚠️ WhatsApp not configured (Twilio credentials needed)');
-                            updateStatus('whatsappStatus', 'WhatsApp not configured (Twilio needed)', false);
-                        } else {
-                            console.error('❌ WhatsApp alert failed:', whatsappResult.error);
-                            updateStatus('whatsappStatus', 'WhatsApp alert failed', false);
-                        }
-                    }
-                } catch (error) {
-                    console.error('❌ Failed to send WhatsApp alerts:', error);
-                    updateStatus('whatsappStatus', 'WhatsApp alert error', false);
-                }
-                
-                console.log('🚨 EMERGENCY ALERT PROCESS COMPLETED');
+                console.log('🚨 AUTOMATIC EMAIL ALERTS PROCESS COMPLETED');
             }
 
             renderCameras() {

@@ -1,0 +1,6 @@
+@echo off
+echo Applying database migrations...
+python manage.py migrate fire_detection --fake 0003
+echo.
+echo Starting Django server...
+python manage.py runserver

@@ -30,6 +30,7 @@ urlpatterns = [
     
     # API endpoints
     path('api/', include(router.urls)),
+    path('api/analytics-data/', views.analytics_data, name='analytics-data'),
     
     # Real-time analysis endpoints
     path('api/analyze-video/', views.analyze_video_realtime, name='analyze-video'),

@@ -21,6 +21,7 @@ from .serializers import (
 from .tasks import process_camera_frame, send_emergency_alerts, trigger_emergency_response, trigger_smoke_alert
 import logging
 import time
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -117,8 +118,144 @@ def incident_history_view(request):
     return render(request, 'incident-history.html')
 
 def analytics_view(request):
-    """Serve the analytics interface"""
-    return render(request, 'analytics.html')
+    """Serve the analytics interface with Python-generated charts"""
+    from .analytics_charts import generate_all_charts
+    
+    # Get time range from query params
+    time_range = request.GET.get('range', '30d')
+    
+    # Generate all charts using Python
+    charts = generate_all_charts(time_range)
+    
+    context = {
+        'time_range': time_range,
+        'location_chart': charts['location_chart'],
+        'timeline_chart': charts['timeline_chart'],
+        'severity_chart': charts['severity_chart'],
+        'status_chart': charts['status_chart'],
+        'summary_stats': charts['summary_stats']
+    }
+    
+    return render(request, 'analytics_python.html', context)
+
+def analytics_data(request):
+    """API endpoint for analytics data"""
+    from django.db.models import Count, Avg, Q
+    from django.utils import timezone
+    from datetime import timedelta
+    import json
+    
+    try:
+        # Get time range from query params
+        time_range = request.GET.get('range', '30d')
+        
+        # Calculate date range
+        now = timezone.now()
+        if time_range == '24h':
+            start_date = now - timedelta(hours=24)
+        elif time_range == '7d':
+            start_date = now - timedelta(days=7)
+        elif time_range == '90d':
+            start_date = now - timedelta(days=90)
+        else:  # default 30d
+            start_date = now - timedelta(days=30)
+        
+        # Get fire detection events
+        events = FireDetectionEvent.objects.filter(detected_at__gte=start_date)
+        
+        # 1. Incidents over time
+        incidents_by_day = {}
+        false_alarms_by_day = {}
+        for event in events:
+            day_key = event.detected_at.strftime('%Y-%m-%d')
+            if event.status == 'false_alarm':
+                false_alarms_by_day[day_key] = false_alarms_by_day.get(day_key, 0) + 1
+            else:
+                incidents_by_day[day_key] = incidents_by_day.get(day_key, 0) + 1
+        
+        # 2. Accuracy metrics
+        total_events = events.count()
+        false_alarms = events.filter(status='false_alarm').count()
+        true_positives = total_events - false_alarms
+        accuracy = (true_positives / total_events * 100) if total_events > 0 else 0
+        
+        # 3. Location breakdown
+        location_data = events.values('camera__location').annotate(count=Count('id')).order_by('-count')
+        
+        # 4. Response times
+        resolved_events = events.filter(status='resolved', resolved_at__isnull=False)
+        response_times = []
+        for event in resolved_events:
+            response_time = (event.resolved_at - event.detected_at).total_seconds() / 60  # in minutes
+            response_times.append({
+                'event_id': str(event.id),
+                'response_time': round(response_time, 2)
+            })
+        
+        avg_response_time = sum([rt['response_time'] for rt in response_times]) / len(response_times) if response_times else 0
+        
+        # 5. Severity breakdown
+        severity_data = events.values('severity').annotate(count=Count('id'))
+        
+        # 6. Status breakdown
+        status_data = events.values('status').annotate(count=Count('id'))
+        
+        # 7. Detection confidence
+        avg_confidence = events.aggregate(Avg('confidence_score'))['confidence_score__avg'] or 0
+        high_confidence = events.filter(confidence_score__gte=0.85).count()
+        medium_confidence = events.filter(confidence_score__gte=0.60, confidence_score__lt=0.85).count()
+        low_confidence = events.filter(confidence_score__lt=0.60).count()
+        
+        # Prepare response data
+        analytics_data = {
+            'incidents_timeline': {
+                'labels': sorted(list(set(list(incidents_by_day.keys()) + list(false_alarms_by_day.keys())))),
+                'fire_incidents': [incidents_by_day.get(day, 0) for day in sorted(list(set(list(incidents_by_day.keys()) + list(false_alarms_by_day.keys()))))],
+                'false_alarms': [false_alarms_by_day.get(day, 0) for day in sorted(list(set(list(incidents_by_day.keys()) + list(false_alarms_by_day.keys()))))]
+            },
+            'accuracy_metrics': {
+                'accuracy': round(accuracy, 2),
+                'total_events': total_events,
+                'true_positives': true_positives,
+                'false_alarms': false_alarms,
+                'avg_confidence': round(avg_confidence * 100, 2)
+            },
+            'location_breakdown': {
+                'labels': [item['camera__location'] or 'Unknown' for item in location_data[:10]],
+                'counts': [item['count'] for item in location_data[:10]]
+            },
+            'response_times': {
+                'average': round(avg_response_time, 2),
+                'data': response_times[:20]  # Last 20 for chart
+            },
+            'severity_distribution': {
+                'labels': [item['severity'].title() for item in severity_data],
+                'counts': [item['count'] for item in severity_data]
+            },
+            'status_distribution': {
+                'labels': [item['status'].replace('_', ' ').title() for item in status_data],
+                'counts': [item['count'] for item in status_data]
+            },
+            'confidence_distribution': {
+                'high': high_confidence,
+                'medium': medium_confidence,
+                'low': low_confidence
+            },
+            'summary': {
+                'total_incidents': total_events,
+                'active_incidents': events.filter(status='active').count(),
+                'resolved_incidents': events.filter(status='resolved').count(),
+                'avg_response_time_minutes': round(avg_response_time, 2),
+                'accuracy_rate': round(accuracy, 2),
+                'time_range': time_range
+            }
+        }
+        
+        return JsonResponse(analytics_data)
+        
+    except Exception as e:
+        logger.error(f"Analytics data error: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 def emergency_contacts_view(request):
     """Serve the emergency contacts interface"""
@@ -2049,11 +2186,11 @@ Report End
 def _trigger_automatic_emergency_response(video_source, confidence_score):
     """
     Trigger automatic emergency response when fire is detected
-    This function automatically sends emails and makes calls to emergency contacts
+    This function automatically sends emails to all emergency contacts
     """
     try:
         from .models import FireDetectionEvent, Camera, EmergencyContact, SystemConfiguration
-        from .tasks import trigger_emergency_response, send_emergency_email, trigger_emergency_call_enhanced
+        from .tasks import trigger_emergency_response, send_emergency_email
         from django.utils import timezone
         from django.core.cache import cache
         
@@ -2063,8 +2200,8 @@ def _trigger_automatic_emergency_response(video_source, confidence_score):
             logger.info(f"Emergency alert already triggered recently for {video_source}, skipping")
             return
         
-        # Set cache for 5 minutes to prevent duplicate alerts
-        cache.set(cache_key, True, 300)
+        # Set cache for 30 seconds to prevent duplicate alerts (reduced for testing)
+        cache.set(cache_key, True, 30)
         
         logger.critical(f"🚨 AUTOMATIC EMERGENCY RESPONSE TRIGGERED - Fire detected in {video_source} with {confidence_score:.1f}% confidence")
         
@@ -2185,48 +2322,16 @@ Event ID: {fire_event.id}
                 except Exception as e:
                     logger.error(f"Failed to send automatic email to {contact.name}: {str(e)}")
         
-        # 2. AUTOMATIC PHONE CALLS TO PRIORITY CONTACTS
-        call_count = 0
-        priority_contacts = emergency_contacts.filter(category__in=['primary', 'fire_department'])[:3]
-        
-        for contact in priority_contacts:
-            if contact.phone:
-                try:
-                    # Make automatic emergency call
-                    call_message = f"""
-                    This is an automated emergency call from the Fire Detection System.
-                    
-                    A fire has been detected at {virtual_camera.location}.
-                    Detection confidence: {confidence_score:.1f}%
-                    Detection time: {timezone.now().strftime('%H:%M:%S')}
-                    
-                    If you can respond to this emergency, press 1.
-                    If fire department assistance is needed, press 2.
-                    To mark as false alarm, press 3.
-                    
-                    Event ID: {fire_event.id}
-                    """
-                    
-                    # Log the automatic call (in production, integrate with telephony service)
-                    logger.critical(f"🚨📞 AUTOMATIC EMERGENCY CALL TO {contact.name} ({contact.phone})")
-                    logger.info(f"📞 Call message: {call_message}")
-                    
-                    call_count += 1
-                    
-                except Exception as e:
-                    logger.error(f"Failed to make automatic call to {contact.name}: {str(e)}")
-        
-        # 3. UPDATE EVENT STATUS
+        # 2. UPDATE EVENT STATUS
         fire_event.status = 'active'
         fire_event.save()
         
-        # 4. LOG COMPREHENSIVE RESPONSE
+        # 3. LOG COMPREHENSIVE RESPONSE
         response_summary = {
             'event_id': str(fire_event.id),
             'video_source': video_source,
             'confidence_score': confidence_score,
             'email_alerts_sent': email_sent_count,
-            'emergency_calls_initiated': call_count,
             'total_contacts_notified': emergency_contacts.count(),
             'response_timestamp': timezone.now().isoformat(),
             'automatic_response': True
