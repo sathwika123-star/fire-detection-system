@@ -21,7 +21,6 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('camera-feeds/', views.camera_feeds_view, name='camera-feeds'),
     path('incident-history/', views.incident_history_view, name='incident-history'),
-    path('analytics/', views.analytics_view, name='analytics'),
     path('emergency-contacts/', views.emergency_contacts_view, name='emergency-contacts'),
     path('reports/', views.reports_view, name='reports'),
     path('launch/', views.launch_view, name='launch'),
@@ -30,7 +29,6 @@ urlpatterns = [
     
     # API endpoints
     path('api/', include(router.urls)),
-    path('api/analytics-data/', views.analytics_data, name='analytics-data'),
     
     # Real-time analysis endpoints
     path('api/analyze-video/', views.analyze_video_realtime, name='analyze-video'),

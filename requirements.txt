@@ -12,3 +12,7 @@ python-decouple==3.8
 celery==5.3.4
 redis==5.0.1
 requests==2.31.0
+plotly==5.18.0
+django-cors-headers==4.2.0
+channels==4.0.0
+pymysql==1.1.0
