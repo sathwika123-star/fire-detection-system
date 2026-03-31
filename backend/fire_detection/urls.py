@@ -43,6 +43,9 @@ urlpatterns = [
     path('api/download-snapshot/<int:incident_id>/', views.download_incident_snapshot, name='download_incident_snapshot'),
     path('api/generate-report/<int:incident_id>/', views.generate_incident_report, name='generate_incident_report'),
     
+    # Fire Alert Email endpoint
+    path('api/send-fire-alert-email/', views.send_fire_alert_email, name='send_fire_alert_email'),
+    
     # Additional custom endpoints can be added here
 ]
 

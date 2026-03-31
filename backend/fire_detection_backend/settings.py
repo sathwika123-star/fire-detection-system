@@ -3,10 +3,6 @@ import os
 from pathlib import Path
 from decouple import config
 
-# PyMySQL configuration (use PyMySQL as MySQL connector)
-import pymysql
-pymysql.install_as_MySQLdb()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -68,19 +64,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'fire_detection_backend.wsgi.application'
 ASGI_APPLICATION = 'fire_detection_backend.asgi.application'
 
-# Database - MySQL Configuration
+# Database - SQLite Configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fire_detection_system',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -189,10 +177,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=30, cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='projectfire672@gmail.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='elwtxqkajadlvsem')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='xskrglbrwlngaxmz')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='projectfire672@gmail.com')
 SERVER_EMAIL = config('SERVER_EMAIL', default='projectfire672@gmail.com')
+EMAIL_PROVIDER = config('EMAIL_PROVIDER', default='smtp')  # smtp | sendgrid | auto
 
 # Email settings for emergency notifications
 EMERGENCY_EMAIL_SETTINGS = {
@@ -201,9 +191,12 @@ EMERGENCY_EMAIL_SETTINGS = {
     'SUBJECT_PREFIX': '[FIRE ALERT]',
     'INCLUDE_ATTACHMENT': True,
     'MAX_RETRIES': 3,
+    'PROVIDER': EMAIL_PROVIDER,
 }
 
 SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
+SENDGRID_FROM_EMAIL = config('SENDGRID_FROM_EMAIL', default=DEFAULT_FROM_EMAIL)
+SENDGRID_TIMEOUT = config('SENDGRID_TIMEOUT', default=20, cast=int)
 
 # Logging configuration
 LOGGING = {

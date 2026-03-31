@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.core.cache import cache
+from django.core.mail import send_mail
 from .models import (
     Camera, FireDetectionEvent, EmergencyContact, 
     SystemConfiguration, AlertNotification, SystemPerformanceMetrics
@@ -118,8 +119,28 @@ def incident_history_view(request):
     return render(request, 'incident-history.html')
 
 def emergency_contacts_view(request):
-    """Serve the emergency contacts interface"""
-    return render(request, 'emergency-contacts.html')
+    """Serve the emergency contacts interface with all active contacts"""
+    # Get all emergency contacts from database
+    contacts = EmergencyContact.objects.filter(is_available=True).order_by('-priority', 'category', 'name')
+    
+    # Group contacts by category for organized display
+    contacts_by_category = {}
+    for contact in contacts:
+        category = contact.category
+        if category not in contacts_by_category:
+            contacts_by_category[category] = []
+        contacts_by_category[category].append(contact)
+    
+    context = {
+        'contacts': contacts,
+        'contacts_by_category': contacts_by_category,
+        'total_contacts': contacts.count(),
+        'high_priority_count': contacts.filter(priority='high').count(),
+        'smtp_enabled': True,
+        'email_service': 'Gmail SMTP (smtp.gmail.com:587)',
+    }
+    
+    return render(request, 'emergency-contacts.html', context)
 
 def reports_view(request):
     """Serve the reports interface"""
@@ -2204,3 +2225,229 @@ Event ID: {fire_event.id}
     except Exception as e:
         logger.error(f"Automatic emergency response error: {str(e)}")
         return {"error": str(e)}
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def send_fire_alert_email(request):
+    """
+    Send fire alert emails to all emergency contacts via SMTP
+    Called when user acknowledges a fire incident
+    """
+    import json
+    
+    try:
+        # Parse request data
+        data = json.loads(request.body) if request.body else {}
+        camera_name = data.get('camera_name', 'Unknown Camera')
+        location = data.get('location', 'Unknown Location')
+        confidence = data.get('confidence', 0)
+        people_count = data.get('people_count', 0)
+        
+        logger.info(f"🚨 Fire Alert Email Request: {camera_name} at {location} ({confidence}% confidence)")
+        
+        # Get or create camera for this incident
+        from .models import Camera, FireDetectionEvent
+        
+        camera, created = Camera.objects.get_or_create(
+            name=camera_name,
+            defaults={
+                'location': location,
+                'rtsp_url': f'file://{camera_name}',
+                'status': 'online'
+            }
+        )
+        
+        # Create fire detection event
+        fire_event = FireDetectionEvent.objects.create(
+            camera=camera,
+            confidence_score=confidence / 100.0,
+            severity='critical' if confidence > 85 else 'high',
+            status='active',
+            bounding_boxes='[]'
+        )
+        
+        logger.info(f"🔥 Created fire event ID: {fire_event.id} for {camera_name}")
+        
+        # Use email service to send emergency alerts
+        from .email_service import email_service
+        
+        result = email_service.send_emergency_fire_alert(fire_event)
+        
+        if result['success']:
+            logger.info(f"✅ Emergency emails sent to {result['sent_count']} contacts via email service")
+            return JsonResponse({
+                'success': True,
+                'message': result.get('message', f"Emergency alert emails sent to {result['sent_count']} contacts"),
+                'emails_sent': result['sent_count'],
+                'total_contacts': result['total_recipients'],
+                'failed_contacts': result.get('failed_recipients', []),
+                'failed_count': len(result.get('failed_recipients', [])),
+                'camera_name': camera_name,
+                'location': location,
+                'confidence': confidence,
+                'event_id': str(fire_event.id),
+                'smtp_server': 'smtp.gmail.com:587',
+                'protocol': 'SMTP with TLS'
+            })
+        else:
+            logger.error(f"❌ Failed to send emergency emails: {result.get('message')}")
+            return JsonResponse({
+                'success': False,
+                'error': result.get('message', 'Failed to send emails'),
+                'emails_sent': result.get('sent_count', 0),
+                'total_contacts': result.get('total_recipients', 0),
+                'failed_contacts': result.get('failed_recipients', [])
+            }, status=500)
+        
+        # Legacy code below (kept for reference but not executed)
+        # Get all active emergency contacts
+        emergency_contacts = EmergencyContact.objects.filter(is_available=True)
+        
+        if False and emergency_contacts.count() == 0:
+            return JsonResponse({
+                'success': False,
+                'message': 'No emergency contacts available'
+            }, status=400)
+        
+        # Prepare email content
+        subject = f"🔥 FIRE ALERT: Fire Detected at {location}"
+        
+        email_sent_count = 0
+        failed_contacts = []
+        
+        # Send email to each contact via SMTP
+        for contact in emergency_contacts:
+            if False and contact.email:
+                try:
+                    # Plain text message
+                    message = f"""
+🚨 FIRE ALERT - IMMEDIATE ACTION REQUIRED 🚨
+
+Location: {location}
+Camera: {camera_name}
+Confidence: {confidence}%
+People in Area: {people_count}
+
+Status: FIRE ACCIDENT DETECTED
+Time: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Emergency Response Actions Taken:
+✅ Evacuation procedures activated
+✅ Emergency services notified
+✅ Camera status updated to FIRE ACCIDENT
+
+Contact: {contact.name} ({contact.title})
+Category: {contact.category.upper()}
+
+IMMEDIATE RESPONSE REQUIRED!
+
+---
+Fire Detection System - Automated Emergency Alert
+Sent via SMTP (smtp.gmail.com:587)
+                    """
+                    
+                    # HTML message
+                    html_message = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>
+                            body {{ font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px; }}
+                            .container {{ max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+                            .header {{ background: #dc2626; color: white; padding: 30px; text-align: center; }}
+                            .header h1 {{ margin: 0; font-size: 28px; }}
+                            .alert-icon {{ font-size: 48px; margin: 10px 0; }}
+                            .content {{ padding: 30px; }}
+                            .info-box {{ background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 20px 0; }}
+                            .info-item {{ margin: 10px 0; font-size: 16px; }}
+                            .info-item strong {{ color: #dc2626; }}
+                            .action-box {{ background: #fef9c3; border: 2px solid #eab308; padding: 20px; margin: 20px 0; border-radius: 8px; }}
+                            .footer {{ background: #374151; color: #d1d5db; padding: 20px; text-align: center; font-size: 12px; }}
+                            .btn {{ display: inline-block; background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <div class="alert-icon">🔥</div>
+                                <h1>FIRE ALERT</h1>
+                                <p style="margin: 10px 0 0 0;">Fire Accident Detected</p>
+                            </div>
+                            <div class="content">
+                                <div class="info-box">
+                                    <div class="info-item"><strong>Location:</strong> {location}</div>
+                                    <div class="info-item"><strong>Camera:</strong> {camera_name}</div>
+                                    <div class="info-item"><strong>Confidence:</strong> {confidence}%</div>
+                                    <div class="info-item"><strong>People in Area:</strong> {people_count}</div>
+                                    <div class="info-item"><strong>Status:</strong> FIRE ACCIDENT DETECTED</div>
+                                    <div class="info-item"><strong>Time:</strong> {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}</div>
+                                </div>
+                                
+                                <div class="action-box">
+                                    <h3 style="margin-top: 0; color: #854d0e;">⚠️ Emergency Response Actions</h3>
+                                    <p style="margin: 5px 0;">✅ Evacuation procedures activated</p>
+                                    <p style="margin: 5px 0;">✅ Emergency services notified</p>
+                                    <p style="margin: 5px 0;">✅ Camera status updated to FIRE ACCIDENT</p>
+                                    <p style="margin: 15px 0 0 0; font-weight: bold; color: #dc2626;">IMMEDIATE RESPONSE REQUIRED!</p>
+                                </div>
+                                
+                                <p><strong>Contact Information:</strong></p>
+                                <p>Name: {contact.name}<br>
+                                Title: {contact.title}<br>
+                                Category: {contact.category.upper()}<br>
+                                Phone: {contact.phone}</p>
+                            </div>
+                            <div class="footer">
+                                <p>Fire Detection & Emergency Response System</p>
+                                <p>Automated Emergency Alert via SMTP Protocol</p>
+                                <p>Server: smtp.gmail.com:587 (TLS Encrypted)</p>
+                                <p style="margin-top: 10px; color: #ef4444;">⚠️ This is a critical emergency alert - DO NOT IGNORE</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+                    
+                    # Send email via Django's SMTP backend
+                    send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[contact.email],
+                        html_message=html_message,
+                        fail_silently=False
+                    )
+                    
+                    email_sent_count += 1
+                    logger.info(f"✅ Fire alert email sent to {contact.name} ({contact.email}) via SMTP")
+                    
+                except Exception as e:
+                    logger.error(f"❌ Failed to send email to {contact.name}: {str(e)}")
+                    failed_contacts.append(contact.name)
+        
+        # Return success response
+        response_data = {
+            'success': True,
+            'message': f'Fire alert emails sent to {email_sent_count} emergency contacts',
+            'emails_sent': email_sent_count,
+            'total_contacts': emergency_contacts.count(),
+            'failed_contacts': failed_contacts,
+            'camera_name': camera_name,
+            'location': location,
+            'confidence': confidence,
+            'smtp_server': 'smtp.gmail.com:587',
+            'protocol': 'SMTP with TLS'
+        }
+        
+        logger.info(f"🚨 Fire alert email summary: {email_sent_count}/{emergency_contacts.count()} sent successfully")
+        
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        logger.error(f"Error sending fire alert emails: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+

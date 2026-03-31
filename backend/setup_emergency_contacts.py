@@ -37,7 +37,7 @@ def setup_emergency_contacts():
             'name': 'Emergency Medical Services',
             'title': 'Paramedics',
             'phone': '9989647221',
-            'email': '227r1a6675@cmrtc.ac.in',
+            'email': 'bellalasathwika2@gmail.com',
             'category': 'medical',
             'priority': 'high'
         },
@@ -45,7 +45,7 @@ def setup_emergency_contacts():
             'name': 'Metro Police Department',
             'title': 'Law Enforcement',
             'phone': '9866406226',
-            'email': '227r1a66b3@cmrtc.ac.in',
+            'email': 'muppidojuspoorthi921@gmail.com',
             'category': 'external',
             'priority': 'high'
         },
@@ -61,7 +61,7 @@ def setup_emergency_contacts():
             'name': 'Facility Manager',
             'title': 'Building Manager',
             'phone': '9989647221',
-            'email': '227r1a6675@cmrtc.ac.in',
+            'email': 'bellalasathwika2@gmail.com',
             'category': 'primary',
             'priority': 'high'
         }

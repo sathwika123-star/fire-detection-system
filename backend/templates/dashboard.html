@@ -779,6 +779,44 @@
         // Acknowledge and close fire accident modal
         function acknowledgeFireAccident() {
             const modal = document.getElementById('fireAccidentModal');
+            
+            // Get fire incident data from modal
+            const cameraName = document.getElementById('fireLocationName')?.textContent || 'Unknown Camera';
+            const location = document.getElementById('fireLocationDesc')?.textContent || 'Unknown Location';
+            const confidence = parseFloat(document.getElementById('fireConfidence')?.textContent) || 0;
+            const peopleCount = parseInt(document.getElementById('firePeopleCount')?.textContent) || 0;
+            
+            console.log('🚨 Acknowledging fire accident and sending email alerts...');
+            console.log('Camera:', cameraName, 'Location:', location, 'Confidence:', confidence);
+            
+            // Send fire alert email to all emergency contacts via SMTP
+            fetch('/api/send-fire-alert-email/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    camera_name: cameraName,
+                    location: location,
+                    confidence: confidence,
+                    people_count: peopleCount
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`✅ Fire alert emails sent successfully to ${data.emails_sent} contacts via SMTP`);
+                    console.log(`📧 SMTP Server: ${data.smtp_server}`);
+                    console.log(`🔒 Protocol: ${data.protocol}`);
+                } else {
+                    console.error('❌ Failed to send fire alert emails:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error sending fire alert emails:', error);
+            });
+            
+            // Close modal
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             
@@ -791,7 +829,12 @@
             // Reset modal sound state for next time
             modalSoundEnabled = false;
             
-            console.log('✅ Fire accident acknowledged');
+            console.log('✅ Fire accident acknowledged - redirecting to camera feeds');
+            
+            // Redirect to camera feeds page
+            setTimeout(() => {
+                window.location.href = "{% url 'camera-feeds' %}";
+            }, 1500); // Small delay to allow email request to complete
         }
 
         // Show safe status for safe cameras

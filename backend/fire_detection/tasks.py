@@ -627,22 +627,15 @@ Event ID: {event_id}
                 except Exception as e:
                     logger.error(f"Failed to queue SMS for {contact.name}: {str(e)}")
         
-        # 2. IMMEDIATE EMAIL ALERTS TO ALL CONTACTS  
+        # 2. IMMEDIATE EMAIL ALERTS TO ALL CONTACTS USING EMAIL SERVICE
         email_sent_count = 0
-        for contact in emergency_contacts:
-            if contact.email:
-                try:
-                    send_emergency_email.delay(
-                        contact.email, 
-                        contact.name, 
-                        f"🚨 FIRE EMERGENCY - {event.camera.location}",
-                        emergency_message,
-                        str(event_id)
-                    )
-                    email_sent_count += 1
-                    logger.info(f"📧 Emergency email queued for {contact.name} ({contact.email})")
-                except Exception as e:
-                    logger.error(f"Failed to queue email for {contact.name}: {str(e)}")
+        try:
+            from .email_service import email_service
+            email_result = email_service.send_emergency_fire_alert(event)
+            email_sent_count = email_result.get('sent_count', 0)
+            logger.critical(f"📧 Emergency emails sent to {email_sent_count} contacts via email service")
+        except Exception as e:
+            logger.error(f"Failed to send emergency emails via email service: {str(e)}")
         
         # 3. PRIORITY AUTOMATIC CALLS TO FIRE DEPARTMENT AND PRIMARY CONTACTS
         call_count = 0

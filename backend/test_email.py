@@ -2,10 +2,13 @@ import os
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fire_detection_backend.settings')
+# Set email credentials directly
+os.environ['EMAIL_HOST_USER'] = 'projectfire672@gmail.com'
+os.environ['EMAIL_HOST_PASSWORD'] = 'xskrglbrwlngaxmz'
 django.setup()
 
 from fire_detection.models import EmergencyContact
-from django.core.mail import send_mail
+from fire_detection.email_service import email_service
 
 # Get all emergency contacts
 contacts = EmergencyContact.objects.filter(is_available=True)
@@ -21,15 +24,12 @@ email_sent = 0
 for contact in contacts:
     if contact.email:
         try:
-            send_mail(
-                subject='🚨 TEST: Fire Detection System Email',
-                message=f'Hello {contact.name}, This is a TEST email from the Fire Detection System to verify automatic email delivery to all emergency contacts.',
-                from_email='projectfire672@gmail.com',
-                recipient_list=[contact.email],
-                fail_silently=False
-            )
-            print(f'   ✅ Email sent to {contact.name} ({contact.email})')
-            email_sent += 1
+            success = email_service.send_test_email(contact.email, contact.name)
+            if success:
+                print(f'   ✅ Email sent to {contact.name} ({contact.email})')
+                email_sent += 1
+            else:
+                print(f'   ❌ Failed to send to {contact.name} ({contact.email})')
         except Exception as e:
             print(f'   ❌ Failed to send to {contact.name}: {e}')
 

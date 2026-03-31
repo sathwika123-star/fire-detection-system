@@ -795,14 +795,88 @@
         // Acknowledge fire emergency and stop sound
         function acknowledgeFireEmergency() {
             const modal = document.getElementById('fireEmergencyModal');
+            
+            // Get camera data from modal if available
+            const cameraName = modal?.querySelector('.text-xl.font-bold')?.textContent || 'Unknown Camera';
+            const locationText = modal?.querySelector('p')?.textContent || 'Location: Unknown';
+            const location = locationText.replace('Location: ', '').trim();
+            const confidenceText = Array.from(modal?.querySelectorAll('p') || [])
+                .find(p => p.textContent.includes('Confidence:'))?.textContent || 'Confidence: 0';
+            const confidence = parseFloat(confidenceText.replace('Confidence: ', '').replace('%', '')) || 0;
+            const peopleText = Array.from(modal?.querySelectorAll('p') || [])
+                .find(p => p.textContent.includes('People in Area:'))?.textContent || 'People in Area: 0';
+            const peopleCount = parseInt(peopleText.replace('People in Area: ', '')) || 0;
+            
+            console.log('🚨 Acknowledging fire incident and sending email alerts...');
+            console.log('Camera:', cameraName, 'Location:', location, 'Confidence:', confidence);
+            
+            // Send fire alert email to all emergency contacts via SMTP
+            fetch('/api/send-fire-alert-email/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    camera_name: cameraName,
+                    location: location,
+                    confidence: confidence,
+                    people_count: peopleCount
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`✅ Fire alert emails sent successfully to ${data.emails_sent} contacts via SMTP`);
+                    console.log(`📧 SMTP Server: ${data.smtp_server}`);
+                    console.log(`🔒 Protocol: ${data.protocol}`);
+                    
+                    // Show success notification
+                    if (window.cameraManager) {
+                        const failedCount = data.failed_count || 0;
+                        if (failedCount > 0) {
+                            window.cameraManager.showNotification(
+                                `⚠️ Fire alert emails sent to ${data.emails_sent}/${data.total_contacts} contacts. Failed: ${failedCount}.`,
+                                'warning'
+                            );
+                        } else {
+                            window.cameraManager.showNotification(
+                                `🚨 Fire alert emails sent to ${data.emails_sent} emergency contacts via SMTP!`,
+                                'success'
+                            );
+                        }
+                    }
+                } else {
+                    console.error('❌ Failed to send fire alert emails:', data.error);
+                    if (window.cameraManager) {
+                        window.cameraManager.showNotification(
+                            data.error || 'Failed to send email alerts. Please check SMTP configuration.',
+                            'error'
+                        );
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error sending fire alert emails:', error);
+            });
+            
+            // Remove modal
             if (modal) {
                 modal.remove();
             }
+            
             // Stop the alert sound
             if (typeof stopFireAlertSound === 'function') {
                 stopFireAlertSound();
             }
-            console.log('✅ Fire emergency acknowledged - sound stopped');
+            
+            console.log('✅ Fire emergency acknowledged - Staying on camera feeds page');
+            
+            // Stay on camera feeds page (already here, just reload to refresh data)
+            setTimeout(() => {
+                if (window.cameraManager) {
+                    window.cameraManager.renderCameras();
+                }
+            }, 1000);
         }
 
         function toggleRecording(id) {
