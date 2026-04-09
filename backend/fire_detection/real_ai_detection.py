@@ -5,7 +5,6 @@ This module provides real-time fire and smoke detection capabilities
 
 import cv2
 import numpy as np
-import torch
 import time
 import logging
 from typing import Dict, List, Tuple, Optional, Union
