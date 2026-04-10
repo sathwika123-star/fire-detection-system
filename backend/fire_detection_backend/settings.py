@@ -73,11 +73,13 @@ WSGI_APPLICATION = 'fire_detection_backend.wsgi.application'
 ASGI_APPLICATION = 'fire_detection_backend.asgi.application'
 
 # Database configuration
-# Default: MySQL via env vars (Render-compatible with external MySQL)
-# Optional: SQLite fallback by setting DB_USE_SQLITE=True
+# Default to SQLite unless explicit MySQL settings are provided.
+# This keeps Render booting even if DB env vars are missing.
 DB_USE_SQLITE = config('DB_USE_SQLITE', default=False, cast=bool)
+DB_NAME = config('DB_NAME', default='').strip()
+DB_HOST = config('DB_HOST', default='').strip()
 
-if DB_USE_SQLITE:
+if DB_USE_SQLITE or not DB_NAME or not DB_HOST:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -88,10 +90,10 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': config('DB_NAME', default='fire_detection_system'),
+            'NAME': DB_NAME,
             'USER': config('DB_USER', default='root'),
             'PASSWORD': config('DB_PASSWORD', default='root'),
-            'HOST': config('DB_HOST', default='localhost'),
+            'HOST': DB_HOST,
             'PORT': config('DB_PORT', default=3306, cast=int),
             'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
