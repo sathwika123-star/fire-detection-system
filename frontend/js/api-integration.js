@@ -1,7 +1,7 @@
 // Frontend-Backend API Integration for Fire Detection System
 class FireDetectionAPI {
     constructor() {
-        this.baseURL = 'http://127.0.0.1:8000/api';
+        this.baseURL = `${window.location.origin}/api`;
         this.endpoints = {
             fireDetection: '/fire-detection/',
             statistics: '/fire-detection/statistics/',

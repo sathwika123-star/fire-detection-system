@@ -124,7 +124,7 @@ const CONFIG = {
 
     // API Endpoints (for backend integration)
     API: {
-        BASE_URL: "http://127.0.0.1:8000/api",
+        BASE_URL: `${window.location.origin}/api`,
         ENDPOINTS: {
             CAMERAS: "/cameras/",
             DETECTION: "/fire-detection/",
@@ -141,7 +141,7 @@ const CONFIG = {
 
     // WebSocket Configuration (for real-time updates)
     WEBSOCKET: {
-        URL: "ws://localhost:8000/ws/fire-detection/",
+        URL: `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/fire-detection/`,
         RECONNECT_INTERVAL: 5000,
         MAX_RECONNECT_ATTEMPTS: 10,
         HEARTBEAT_INTERVAL: 30000

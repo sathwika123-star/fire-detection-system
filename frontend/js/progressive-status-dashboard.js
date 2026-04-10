@@ -195,7 +195,7 @@ class ProgressiveStatusDashboard {
 
     async connectToBackend() {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/confidence-live/');
+            const response = await fetch(`${window.location.origin}/api/confidence-live/`);
             if (response.ok) {
                 this.isConnected = true;
                 this.updateConnectionStatus('connected');
@@ -245,7 +245,7 @@ class ProgressiveStatusDashboard {
 
     async fetchLiveData() {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/confidence-live/');
+            const response = await fetch(`${window.location.origin}/api/confidence-live/`);
             if (response.ok) {
                 const data = await response.json();
                 this.currentVideoData = data;
