@@ -226,7 +226,7 @@
     <script>
         class EmergencyContactsManager {
             constructor() {
-                this.apiBaseUrl = 'http://127.0.0.1:8000/api';
+                this.apiBaseUrl = `${window.location.origin}/api`;
                 this.contacts = [];
                 this.init();
             }

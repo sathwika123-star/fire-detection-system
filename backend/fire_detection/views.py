@@ -756,23 +756,23 @@ For system support: padirishitha13@gmail.com
             if send_email:
                 from .email_service import email_service
                 email_result = email_service.send_emergency_fire_alert(incident)
-                
-                # Also send SMS alerts asynchronously (existing functionality)
-                task = send_emergency_alerts.delay(incident_id, message)
-                
+
+                # Also run the alert workflow directly so it works without Celery
+                alert_result = send_emergency_alerts(incident_id, message)
+
                 return Response({
                     'success': True,
                     'message': 'Emergency alerts initiated',
                     'email_result': email_result,
-                    'task_id': task.id
+                    'alert_result': alert_result
                 })
             else:
-                # Send only SMS alerts
-                task = send_emergency_alerts.delay(incident_id, message)
+                # Send only SMS/email workflow directly (no Celery worker required)
+                alert_result = send_emergency_alerts(incident_id, message)
                 return Response({
                     'success': True,
-                    'message': 'Emergency SMS alerts initiated',
-                    'task_id': task.id
+                    'message': 'Emergency alerts initiated',
+                    'alert_result': alert_result
                 })
                 
         except FireDetectionEvent.DoesNotExist:

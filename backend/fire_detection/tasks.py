@@ -65,15 +65,12 @@ def process_camera_frame(camera_id, frame_data):
                         status='active'
                     )
                     
-                    # Send alerts
-                    send_fire_alert.delay(event.id)
+                    # Send alerts directly so Render works without a separate Celery worker
+                    send_fire_alert(event.id)
                     
                     # Auto emergency call if enabled
                     if config.auto_emergency_call:
-                        trigger_emergency_call.delay(
-                            event.id, 
-                            config.emergency_call_delay_seconds
-                        )
+                        trigger_emergency_call(event.id, config.emergency_call_delay_seconds)
                     
                     logger.info(f"Fire detected in camera {camera.name} with confidence {confidence}")
                     
@@ -271,7 +268,6 @@ def send_fire_alert(event_id):
     Automatically sends to all emergency contacts when fire is detected
     """
     from .models import FireDetectionEvent, EmergencyContact, SystemConfiguration
-    import requests
     
     try:
         event = FireDetectionEvent.objects.get(id=event_id)
@@ -289,37 +285,23 @@ def send_fire_alert(event_id):
         
         email_sent = False
         sms_sent = False
-        
-        # 1. SEND EMAIL ALERTS VIA HTTP API
+
+        # Send email alerts directly using the email service
         try:
-            response = requests.post(
-                'http://127.0.0.1:8000/api/send-emergency-alert/',
-                json={
-                    'location': event.camera.location,
-                    'camera': event.camera.name,
-                    'confidence': float(event.confidence_score),
-                    'time': event.detected_at.strftime('%Y-%m-%d %H:%M:%S')
-                },
-                timeout=5
-            )
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('success'):
-                    email_sent = True
-                    logger.critical(f"✅ EMAIL ALERTS SENT to {result.get('sent_count', 0)} contacts")
-                else:
-                    logger.error(f"❌ Email alert failed: {result.get('error')}")
+            from .email_service import email_service
+            email_result = email_service.send_emergency_fire_alert(event)
+            email_sent = bool(email_result.get('success'))
+            if email_sent:
+                logger.critical(
+                    f"✅ EMAIL ALERTS SENT to {email_result.get('sent_count', 0)} contacts"
+                )
             else:
-                logger.error(f"❌ Email HTTP API error: Status {response.status_code}")
+                logger.error(f"❌ Email alert failed: {email_result.get('message')}")
         except Exception as e:
             logger.error(f"❌ Failed to send email alerts: {str(e)}")
-        
-        # 2. SEND SMS ALERTS VIA HTTP API
-        try:
-            # SMS alerts disabled - WhatsApp functionality removed
-            logger.info("SMS/WhatsApp alerts disabled")
-        except Exception as e:
-            logger.error(f"❌ Failed to send SMS alerts: {str(e)}")
+
+        # SMS/WhatsApp alerts are disabled in this deployment path
+        logger.info("SMS/WhatsApp alerts disabled")
         
         # Summary
         alerts_summary = []
@@ -489,11 +471,11 @@ def send_emergency_alerts(incident_id, custom_message=None):
         
         for contact in primary_contacts:
             if contact.phone:
-                send_sms_notification.delay(contact.phone, message)
+                send_sms_notification(contact.phone, message)
                 alerts_sent += 1
-            
+
             if contact.email:
-                send_email_notification.delay(
+                send_email_notification(
                     [contact.email],
                     "🚨 EMERGENCY FIRE ALERT - IMMEDIATE RESPONSE REQUIRED",
                     message,
